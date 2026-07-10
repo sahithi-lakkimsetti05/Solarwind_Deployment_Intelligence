@@ -2,11 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, require_roles
 
 from app.models.environmental_data import EnvironmentalData
-from app.models.site import Site
-
 from app.schemas.environmental_data import (
     EnvironmentalDataCreate,
     EnvironmentalDataResponse,
@@ -26,30 +24,9 @@ router = APIRouter(
 def create_environmental_data(
     data: EnvironmentalDataCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user=Depends(require_roles(["Admin", "GIS Analyst"]))
 ):
-    # Check if site exists
-    site = (
-        db.query(Site)
-        .filter(Site.id == data.site_id)
-        .first()
-    )
-
-    if not site:
-        raise HTTPException(
-            status_code=404,
-            detail="Site not found."
-        )
-
-    new_record = EnvironmentalData(
-        site_id=data.site_id,
-        temperature=data.temperature,
-        humidity=data.humidity,
-        wind_speed=data.wind_speed,
-        solar_irradiance=data.solar_irradiance,
-        rainfall=data.rainfall,
-        air_pressure=data.air_pressure
-    )
+    new_record = EnvironmentalData(**data.model_dump())
 
     db.add(new_record)
     db.commit()
@@ -64,7 +41,7 @@ def create_environmental_data(
 )
 def get_environmental_data(
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user=Depends(get_current_user)
 ):
     return db.query(EnvironmentalData).all()
 
@@ -76,10 +53,73 @@ def get_environmental_data(
 def get_site_environmental_data(
     site_id: int,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user=Depends(get_current_user)
 ):
     return (
         db.query(EnvironmentalData)
         .filter(EnvironmentalData.site_id == site_id)
         .all()
     )
+
+
+@router.put(
+    "/{record_id}",
+    response_model=EnvironmentalDataResponse
+)
+def update_environmental_data(
+    record_id: int,
+    data: EnvironmentalDataCreate,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles(["Admin", "GIS Analyst"]))
+):
+    db_record = (
+        db.query(EnvironmentalData)
+        .filter(EnvironmentalData.id == record_id)
+        .first()
+    )
+
+    if not db_record:
+        raise HTTPException(
+            status_code=404,
+            detail="Environmental data not found"
+        )
+
+    db_record.site_id = data.site_id
+    db_record.temperature = data.temperature
+    db_record.humidity = data.humidity
+    db_record.wind_speed = data.wind_speed
+    db_record.solar_irradiance = data.solar_irradiance
+    db_record.rainfall = data.rainfall
+    db_record.air_pressure = data.air_pressure
+
+    db.commit()
+    db.refresh(db_record)
+
+    return db_record
+
+@router.delete(
+    "/{record_id}"
+)
+def delete_environmental_data(
+    record_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles(["Admin"]))
+):
+    db_record = (
+        db.query(EnvironmentalData)
+        .filter(EnvironmentalData.id == record_id)
+        .first()
+    )
+
+    if not db_record:
+        raise HTTPException(
+            status_code=404,
+            detail="Environmental data not found"
+        )
+
+    db.delete(db_record)
+    db.commit()
+
+    return {
+        "message": "Environmental data deleted successfully"
+    }

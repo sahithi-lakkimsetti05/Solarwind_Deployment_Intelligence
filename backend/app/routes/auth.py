@@ -11,6 +11,7 @@ from app.core.security import (
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse
 from app.schemas.token import Token, LoginRequest
+from app.core.dependencies import get_current_user
 
 router = APIRouter(
     prefix="/auth",
@@ -30,6 +31,12 @@ def register(
     user: UserCreate,
     db: Session = Depends(get_db)
 ):
+
+    if len(user.password.encode("utf-8")) > 72:
+        raise HTTPException(
+            status_code=400,
+            detail="Password must not exceed 72 bytes."
+        )
 
     existing_user = (
         db.query(User)
@@ -55,7 +62,6 @@ def register(
     db.refresh(new_user)
 
     return new_user
-
 
 # -----------------------------
 # Login User
@@ -86,6 +92,7 @@ def login(
             status_code=401,
             detail="Invalid email or password"
         )
+    
 
     access_token = create_access_token(
         data={
@@ -98,3 +105,29 @@ def login(
         "access_token": access_token,
         "token_type": "bearer"
     }
+
+# -----------------------------
+# Get Current User
+# -----------------------------
+@router.get(
+    "/me",
+    response_model=UserResponse
+)
+def get_logged_in_user(
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    user = (
+        db.query(User)
+        .filter(User.email == current_user["sub"])
+        .first()
+    )
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found"
+        )
+
+    return user
+
