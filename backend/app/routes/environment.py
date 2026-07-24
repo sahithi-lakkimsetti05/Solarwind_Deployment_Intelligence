@@ -1,6 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.models.site import Site
+
+from app.services.weather_service import get_live_weather
+from app.services.nasa_service import get_solar_data
+
+from app.models.site import Site
+from app.services.weather_service import get_live_weather
+
 from app.core.database import get_db
 from app.core.dependencies import get_current_user, require_roles
 
@@ -61,7 +69,59 @@ def get_site_environmental_data(
         .all()
     )
 
+@router.get(
+    "/live/{site_id}"
+)
+@router.post(
+    "/sync/{site_id}",
+    response_model=EnvironmentalDataResponse
+)
+def sync_live_environment_data(
+    site_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_roles(["Admin", "GIS Analyst"]))
+):
 
+    site = (
+        db.query(Site)
+        .filter(Site.id == site_id)
+        .first()
+    )
+
+    if not site:
+        raise HTTPException(
+            status_code=404,
+            detail="Site not found"
+        )
+
+    # Get Weather Data
+    weather = get_live_weather(
+        site.latitude,
+        site.longitude
+    )
+
+    # Get NASA Solar Data
+    solar = get_solar_data(
+        site.latitude,
+        site.longitude
+    )
+
+    # Save Environmental Record
+    new_record = EnvironmentalData(
+        site_id=site.id,
+        temperature=weather["temperature"],
+        humidity=weather["humidity"],
+        wind_speed=weather["wind_speed"],
+        solar_irradiance=solar["solar_irradiance"],
+        rainfall=weather["rainfall"],
+        air_pressure=weather["air_pressure"]
+    )
+
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+
+    return new_record
 @router.put(
     "/{record_id}",
     response_model=EnvironmentalDataResponse
