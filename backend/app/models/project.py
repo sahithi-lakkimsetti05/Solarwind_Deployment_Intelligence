@@ -13,4 +13,9 @@ class Project(Base):
     location = Column(String(150))
     status = Column(String(50), default="Planning")
 
-    sites = relationship("Site", back_populates="project")
+
+    sites = relationship(
+    "Site",
+    back_populates="project",
+    lazy="joined"
+)
