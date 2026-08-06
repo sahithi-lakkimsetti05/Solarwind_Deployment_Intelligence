@@ -15,6 +15,10 @@ from app.routes.project import router as project_router
 from app.routes.site import router as site_router
 from app.routes.environment import router as environment_router
 
+from app.models.prediction_history import PredictionHistory
+
+from app.routes.dashboard import router as dashboard_router
+
 app = FastAPI(
     title="Solar & Wind Deployment Intelligence Platform",
     version="1.0.0"
@@ -46,6 +50,7 @@ app.include_router(project_router)
 app.include_router(site_router)
 app.include_router(environment_router)
 app.include_router(prediction_router)
+app.include_router(dashboard_router)
 
 # -----------------------------
 # Root Endpoint
