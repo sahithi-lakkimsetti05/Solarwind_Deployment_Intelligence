@@ -1,116 +1,98 @@
-import GIS from "./pages/GIS/GIS";
-
-import Analytics from "./pages/Analytics/Analytics";
-
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register";
 
 import Dashboard from "./pages/Dashboard/Dashboard";
-
 import Projects from "./pages/Projects/Projects";
-
 import Sites from "./pages/Sites/Sites";
-
 import Environment from "./pages/Environment/Environment";
+import GIS from "./pages/GIS/GIS";
+import Analytics from "./pages/Analytics/Analytics";
 
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 
 function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
 
-    return (
+        {/* =========================
+            PUBLIC ROUTES
+        ========================= */}
 
-        <BrowserRouter>
+        <Route
+          path="/"
+          element={<Login />}
+        />
 
-            <Routes>
+        <Route
+          path="/register"
+          element={<Register />}
+        />
 
-                <Route
 
-                    path="/"
+        {/* =========================
+            PROTECTED ROUTES
+        ========================= */}
 
-                    element={<Login />}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
 
-                />
+        <Route
+          path="/projects"
+          element={
+            <ProtectedRoute>
+              <Projects />
+            </ProtectedRoute>
+          }
+        />
 
-                <Route
+        <Route
+          path="/sites"
+          element={
+            <ProtectedRoute>
+              <Sites />
+            </ProtectedRoute>
+          }
+        />
 
-                    path="/dashboard"
+        <Route
+          path="/environment"
+          element={
+            <ProtectedRoute>
+              <Environment />
+            </ProtectedRoute>
+          }
+        />
 
-                    element={
+        <Route
+          path="/gis"
+          element={
+            <ProtectedRoute>
+              <GIS />
+            </ProtectedRoute>
+          }
+        />
 
-                        
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          }
+        />
 
-                            <Dashboard />
-
-                        
-
-                    }
-
-                />
-
-                <Route
-
-                    path="/projects"
-
-                    element={
-
-                        
-
-                            <Projects />
-
-                        
-
-                    }
-
-                />
-
-                <Route
-
-                    path="/sites"
-
-                    element={
-
-                        
-
-                            <Sites />
-
-                        
-
-                    }
-
-                />
-
-                <Route
-
-                    path="/environment"
-
-                    element={
-
-                            <Environment />
-
-                        
-
-                    }
-
-                />
-                <Route
-                    path="/gis"
-                    element={<GIS />}
-                  />
-
-                  <Route
-                  path="/analytics"
-                  element={<Analytics />} 
-                  />
-
-                
-
-            </Routes>
-
-        </BrowserRouter>
-
-    );
-
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

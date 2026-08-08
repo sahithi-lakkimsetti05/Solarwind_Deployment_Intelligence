@@ -120,3 +120,25 @@
   font-size:14px;
   opacity:.8;
 }
+
+/* Register Link */
+
+.register-link {
+  margin-top: 20px;
+  margin-bottom: 5px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+}
+
+.register-link a {
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
