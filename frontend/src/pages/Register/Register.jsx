@@ -1,22 +1,41 @@
-import "./Register.css";
+﻿import "./Register.css";
 
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import Logo from "../../components/Logo/Logo";
+import { registerUser } from "../../services/authService";
 
 function Register() {
   const navigate = useNavigate();
 
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [role, setRole] = useState("");
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [roleOpen, setRoleOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const roles = [
+    "Planner",
+    "GIS Analyst",
+    "Project Manager",
+    "Admin",
+  ];
+
   const handleRegister = async () => {
-    if (!email || !password || !confirmPassword) {
+    if (
+      !fullName ||
+      !email ||
+      !password ||
+      !confirmPassword ||
+      !role
+    ) {
       alert("Please fill in all fields.");
       return;
     }
@@ -29,33 +48,18 @@ function Register() {
     try {
       setLoading(true);
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        }
+      await registerUser(
+        fullName,
+        email,
+        password,
+        role
       );
 
-      const data = await response.json();
+      alert("Γ£à Account created successfully!");
 
-      if (!response.ok) {
-        throw new Error(
-          data.detail || "Registration failed."
-        );
-      }
-
-      alert("✅ Account created successfully!");
-
-      navigate("/login");
+      navigate("/");
     } catch (error) {
-      console.error(error);
+      console.error("Registration error:", error);
 
       alert(
         error.message ||
@@ -69,90 +73,290 @@ function Register() {
   return (
     <div className="register-container">
 
-      {/* Decorative glowing circles */}
+      {/* Background effects */}
       <div className="register-glow register-glow-one"></div>
       <div className="register-glow register-glow-two"></div>
+      <div className="register-glow register-glow-three"></div>
+
+      <div className="register-orb orb-one"></div>
+      <div className="register-orb orb-two"></div>
 
       <motion.div
         className="register-card"
-        initial={{ opacity: 0, y: 70 }}
+        initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
 
-        <Logo />
+        {/* Logo */}
+        <div className="register-logo">
+          <Logo />
+        </div>
 
+        {/* Heading */}
         <div className="register-heading">
+
           <h2>Create Your Account</h2>
 
           <p>
-            Join the Solar & Wind Deployment
-            Intelligence Platform
+            Join the Solar & Wind Deployment Intelligence
+            Platform
           </p>
+
+        </div>
+
+        {/* Full Name */}
+        <div className="register-input-box">
+
+          <label>Full Name</label>
+
+          <div className="input-wrapper">
+
+            <span className="input-icon">
+              ≡ƒæñ
+            </span>
+
+            <input
+              type="text"
+              placeholder="Enter your full name"
+              value={fullName}
+              onChange={(e) =>
+                setFullName(e.target.value)
+              }
+            />
+
+          </div>
+
         </div>
 
         {/* Email */}
         <div className="register-input-box">
+
           <label>Email</label>
 
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <div className="input-wrapper">
+
+            <span className="input-icon">
+              Γ£ë
+            </span>
+
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+            />
+
+          </div>
+
         </div>
 
         {/* Password */}
         <div className="register-input-box">
+
           <label>Password</label>
 
-          <input
-            type="password"
-            placeholder="Create a password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div className="input-wrapper">
+
+            <span className="input-icon">
+              ≡ƒöÆ
+            </span>
+
+            <input
+              type={
+                showPassword
+                  ? "text"
+                  : "password"
+              }
+              placeholder="Create a password"
+              value={password}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
+            />
+
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() =>
+                setShowPassword(!showPassword)
+              }
+            >
+              {showPassword ? "Γùë" : "Γùî"}
+            </button>
+
+          </div>
+
         </div>
 
         {/* Confirm Password */}
         <div className="register-input-box">
+
           <label>Confirm Password</label>
 
-          <input
-            type="password"
-            placeholder="Confirm your password"
-            value={confirmPassword}
-            onChange={(e) =>
-              setConfirmPassword(e.target.value)
-            }
-          />
+          <div className="input-wrapper">
+
+            <span className="input-icon">
+              ≡ƒöÆ
+            </span>
+
+            <input
+              type={
+                showConfirmPassword
+                  ? "text"
+                  : "password"
+              }
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChange={(e) =>
+                setConfirmPassword(e.target.value)
+              }
+            />
+
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() =>
+                setShowConfirmPassword(
+                  !showConfirmPassword
+                )
+              }
+            >
+              {showConfirmPassword ? "Γùë" : "Γùî"}
+            </button>
+
+          </div>
+
         </div>
 
-        {/* Register Button */}
+        {/* Role */}
+        <div className="register-input-box role-box">
+
+          <label>Role</label>
+
+          <div
+            className={`custom-select ${
+              roleOpen ? "active" : ""
+            }`}
+            onClick={() =>
+              setRoleOpen(!roleOpen)
+            }
+          >
+
+            <div className="select-display">
+
+              <span className="role-icon">
+                ≡ƒæÑ
+              </span>
+
+              <span
+                className={
+                  role
+                    ? "selected-role"
+                    : "placeholder-role"
+                }
+              >
+                {role || "Select your role"}
+              </span>
+
+              <span
+                className={`dropdown-arrow ${
+                  roleOpen ? "rotate" : ""
+                }`}
+              >
+                Γû╛
+              </span>
+
+            </div>
+
+            {roleOpen && (
+              <div className="role-options">
+
+                <div
+                  className="role-option placeholder-option"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setRole("");
+                    setRoleOpen(false);
+                  }}
+                >
+                  <span>Γùî</span>
+                  Select your role
+                </div>
+
+                {roles.map((item) => (
+                  <div
+                    key={item}
+                    className={`role-option ${
+                      role === item
+                        ? "selected-option"
+                        : ""
+                    }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setRole(item);
+                      setRoleOpen(false);
+                    }}
+                  >
+
+                    <span className="option-icon">
+                      {item === "Planner" && "≡ƒôà"}
+                      {item === "GIS Analyst" && "≡ƒîÉ"}
+                      {item === "Project Manager" && "≡ƒÆ╝"}
+                      {item === "Admin" && "≡ƒ¢í"}
+                    </span>
+
+                    <span>{item}</span>
+
+                  </div>
+                ))}
+
+              </div>
+            )}
+
+          </div>
+
+        </div>
+
+        {/* Register button */}
         <button
           className="register-btn"
           onClick={handleRegister}
           disabled={loading}
         >
+
           {loading
             ? "Creating Account..."
-            : "Create Account →"}
+            : "Create Account ΓåÆ"}
+
         </button>
 
-        {/* Login Link */}
+        {/* Login */}
         <p className="login-redirect">
+
           Already have an account?{" "}
-          <Link to="/login">
+
+          <Link to="/">
             Login here
           </Link>
+
         </p>
 
+        {/* Footer */}
         <div className="register-footer">
-          © 2026 SolarWind Deployment Intelligence
+
+          <div className="footer-line"></div>
+
+          <span>
+            ┬⌐ 2026 SolarWind Deployment Intelligence
+          </span>
+
         </div>
 
       </motion.div>
+
     </div>
   );
 }

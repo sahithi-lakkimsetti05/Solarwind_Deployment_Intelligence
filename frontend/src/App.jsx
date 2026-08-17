@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+
 import Login from "./pages/Login/Login";
 import Register from "./pages/Register/Register";
 
@@ -8,6 +9,7 @@ import Projects from "./pages/Projects/Projects";
 import Sites from "./pages/Sites/Sites";
 import Environment from "./pages/Environment/Environment";
 import GIS from "./pages/GIS/GIS";
+import Prediction from "./pages/Prediction/Prediction";
 import Analytics from "./pages/Analytics/Analytics";
 
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
@@ -80,6 +82,15 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/prediction"
+  element={
+    <ProtectedRoute>
+      <Prediction />
+    </ProtectedRoute>
+  }
+/>
 
         <Route
           path="/analytics"

@@ -2,11 +2,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.models.site import Site
-
-from app.services.weather_service import get_live_weather
-from app.services.nasa_service import get_solar_data
-
-from app.models.site import Site
 from app.services.weather_service import get_live_weather
 
 from app.core.database import get_db
@@ -23,6 +18,10 @@ router = APIRouter(
     tags=["Environmental Data"]
 )
 
+
+# --------------------------------------------------
+# Create Environmental Data Manually
+# --------------------------------------------------
 
 @router.post(
     "/",
@@ -43,6 +42,10 @@ def create_environmental_data(
     return new_record
 
 
+# --------------------------------------------------
+# Get All Environmental Data
+# --------------------------------------------------
+
 @router.get(
     "/",
     response_model=list[EnvironmentalDataResponse]
@@ -53,6 +56,10 @@ def get_environmental_data(
 ):
     return db.query(EnvironmentalData).all()
 
+
+# --------------------------------------------------
+# Get Environmental Data For A Site
+# --------------------------------------------------
 
 @router.get(
     "/site/{site_id}",
@@ -69,9 +76,12 @@ def get_site_environmental_data(
         .all()
     )
 
-@router.get(
-    "/live/{site_id}"
-)
+
+# --------------------------------------------------
+# Live Environmental Data Synchronization
+# --------------------------------------------------
+
+@router.get("/live/{site_id}")
 @router.post(
     "/sync/{site_id}",
     response_model=EnvironmentalDataResponse
@@ -82,6 +92,7 @@ def sync_live_environment_data(
     current_user=Depends(require_roles(["Admin", "GIS Analyst"]))
 ):
 
+    # Find Site
     site = (
         db.query(Site)
         .filter(Site.id == site_id)
@@ -94,25 +105,36 @@ def sync_live_environment_data(
             detail="Site not found"
         )
 
-    # Get Weather Data
+    # --------------------------------------------------
+    # Get Live Weather + Solar Irradiance
+    # --------------------------------------------------
+
     weather = get_live_weather(
         site.latitude,
         site.longitude
     )
 
-    # Get NASA Solar Data
-    solar = get_solar_data(
-        site.latitude,
-        site.longitude
-    )
+    # Open-Meteo provides live solar irradiance.
+    # This replaces the NASA value that was returning -999.
+    solar_irradiance = weather["irradiance_g"]
 
+    # Safety check
+    if solar_irradiance is None or solar_irradiance < 0:
+        raise HTTPException(
+            status_code=502,
+            detail="Invalid solar irradiance received from weather service"
+        )
+
+    # --------------------------------------------------
     # Save Environmental Record
+    # --------------------------------------------------
+
     new_record = EnvironmentalData(
         site_id=site.id,
         temperature=weather["temperature"],
         humidity=weather["humidity"],
         wind_speed=weather["wind_speed"],
-        solar_irradiance=solar["solar_irradiance"],
+        solar_irradiance=solar_irradiance,
         rainfall=weather["rainfall"],
         air_pressure=weather["air_pressure"]
     )
@@ -122,6 +144,12 @@ def sync_live_environment_data(
     db.refresh(new_record)
 
     return new_record
+
+
+# --------------------------------------------------
+# Update Environmental Data
+# --------------------------------------------------
+
 @router.put(
     "/{record_id}",
     response_model=EnvironmentalDataResponse
@@ -132,6 +160,7 @@ def update_environmental_data(
     db: Session = Depends(get_db),
     current_user=Depends(require_roles(["Admin", "GIS Analyst"]))
 ):
+
     db_record = (
         db.query(EnvironmentalData)
         .filter(EnvironmentalData.id == record_id)
@@ -157,6 +186,11 @@ def update_environmental_data(
 
     return db_record
 
+
+# --------------------------------------------------
+# Delete Environmental Data
+# --------------------------------------------------
+
 @router.delete(
     "/{record_id}"
 )
@@ -165,6 +199,7 @@ def delete_environmental_data(
     db: Session = Depends(get_db),
     current_user=Depends(require_roles(["Admin"]))
 ):
+
     db_record = (
         db.query(EnvironmentalData)
         .filter(EnvironmentalData.id == record_id)

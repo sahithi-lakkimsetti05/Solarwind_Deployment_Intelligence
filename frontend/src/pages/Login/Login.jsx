@@ -1,4 +1,4 @@
-import "./Login.css";
+﻿import "./Login.css";
 
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -26,7 +26,7 @@ function Login() {
 
       localStorage.setItem("token", data.access_token);
 
-      alert("✅ Login Successful!");
+      alert("Γ£à Login Successful!");
 
       navigate("/dashboard");
     } catch (error) {
@@ -65,7 +65,7 @@ function Login() {
         />
 
         <PrimaryButton onClick={handleLogin}>
-          {loading ? "Logging in..." : "Secure Login →"}
+          {loading ? "Logging in..." : "Secure Login ΓåÆ"}
         </PrimaryButton>
 
         {/* Register Link */}
@@ -75,7 +75,7 @@ function Login() {
         </p>
 
         <div className="footer">
-          © 2026 SolarWind Deployment Intelligence
+          ┬⌐ 2026 SolarWind Deployment Intelligence
         </div>
       </motion.div>
     </div>

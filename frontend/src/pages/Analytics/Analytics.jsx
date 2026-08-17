@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
 
 import {
-  Box,
-  Grid,
-  Typography,
-  CircularProgress,
+    Box,
+    Grid,
+    Typography,
+    CircularProgress,
+    Alert,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel,
 } from "@mui/material";
 
 import DashboardLayout from "../../layouts/DashboardLayout";
@@ -14,206 +19,295 @@ import PredictionChart from "../../components/Analytics/PredictionChart";
 import TopSiteCard from "../../components/Analytics/TopSiteCard";
 
 import { getSites } from "../../services/siteService";
-import { getEnvironmentData } from "../../services/environmentService";
 
 import {
-  calculateSolarScore,
-  calculateWindScore,
-} from "../../utils/predictionEngine";
+    getPredictionAnalytics,
+    getRecommendation,
+    getPredictionHistory,
+} from "../../services/predictionService";
 
-import PlaceIcon from "@mui/icons-material/Place";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import AirIcon from "@mui/icons-material/Air";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 function Analytics() {
+    const [loading, setLoading] = useState(true);
 
-  const [loading, setLoading] = useState(true);
+    const [sites, setSites] = useState([]);
 
-  const [sites, setSites] = useState([]);
+    const [selectedSite, setSelectedSite] = useState("");
 
-  const [averageSolar, setAverageSolar] = useState(0);
+    const [analytics, setAnalytics] = useState(null);
 
-  const [averageWind, setAverageWind] = useState(0);
+    const [recommendation, setRecommendation] = useState(null);
 
-  const [bestSite, setBestSite] = useState(null);
+    const [history, setHistory] = useState([]);
 
-  useEffect(() => {
-    loadAnalytics();
-  }, []);
+    const [error, setError] = useState("");
 
-  const loadAnalytics = async () => {
+    // ----------------------------------------
+    // Load Sites
+    // ----------------------------------------
 
-    try {
+    useEffect(() => {
+        const loadSites = async () => {
+            try {
+                const data = await getSites();
 
-      const siteData = await getSites();
+                setSites(data);
 
-      const envData = await getEnvironmentData();
+                if (data.length > 0) {
+                    setSelectedSite(data[0].id);
+                }
+            } catch (err) {
+                console.error(err);
+                setError("Failed to load sites.");
+                setLoading(false);
+            }
+        };
 
-      setSites(siteData);
+        loadSites();
+    }, []);
 
-      let totalSolar = 0;
+    // ----------------------------------------
+    // Load Analytics + Recommendation + History
+    // ----------------------------------------
 
-      let totalWind = 0;
-
-      let highestScore = 0;
-
-      let topSite = null;
-
-      siteData.forEach((site) => {
-
-        const env = envData.find(
-          (e) => e.site_id === site.id
-        );
-
-        if (!env) return;
-
-        const solarScore = calculateSolarScore(env);
-
-        const windScore = calculateWindScore(env);
-
-        totalSolar += solarScore;
-
-        totalWind += windScore;
-
-        const combined = (solarScore + windScore) / 2;
-
-        if (combined > highestScore) {
-
-          highestScore = combined;
-
-          topSite = {
-            ...site,
-            solarScore,
-            windScore,
-          };
-
+    useEffect(() => {
+        if (!selectedSite) {
+            return;
         }
 
-      });
+        const loadAnalytics = async () => {
+            setLoading(true);
+            setError("");
 
-      const validSites = envData.length || 1;
+            try {
+                const [
+                    analyticsData,
+                    recommendationData,
+                    historyData,
+                ] = await Promise.all([
+                    getPredictionAnalytics(selectedSite),
+                    getRecommendation(selectedSite),
+                    getPredictionHistory(selectedSite),
+                ]);
 
-      setAverageSolar(
-        Math.round(totalSolar / validSites)
-      );
+                setAnalytics(analyticsData);
+                setRecommendation(recommendationData);
+                setHistory(historyData);
+            } catch (err) {
+                console.error(err);
 
-      setAverageWind(
-        Math.round(totalWind / validSites)
-      );
+                setAnalytics(null);
+                setRecommendation(null);
+                setHistory([]);
 
-      setBestSite(topSite);
+                setError(
+                    "No prediction data available for this site."
+                );
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    } catch (err) {
+        loadAnalytics();
+    }, [selectedSite]);
 
-      console.error(err);
+    // ----------------------------------------
+    // Loading
+    // ----------------------------------------
 
-      alert("Failed to load analytics.");
-
-    } finally {
-
-      setLoading(false);
-
+    if (loading && !analytics) {
+        return (
+            <DashboardLayout>
+                <Box
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    minHeight="400px"
+                >
+                    <CircularProgress />
+                </Box>
+            </DashboardLayout>
+        );
     }
 
-  };
-
-  if (loading) {
+    // ----------------------------------------
+    // Dashboard
+    // ----------------------------------------
 
     return (
+        <DashboardLayout>
 
-      <DashboardLayout>
+            <Typography
+                variant="h4"
+                fontWeight={700}
+                mb={3}
+            >
+                Renewable Resource Analytics
+            </Typography>
 
-        <Box
-          display="flex"
-          justifyContent="center"
-          mt={10}
-        >
-          <CircularProgress />
-        </Box>
+            {/* SITE SELECTOR */}
 
-      </DashboardLayout>
+            <Box mb={4}>
+                <FormControl sx={{ minWidth: 280 }}>
+                    <InputLabel>
+                        Select Site
+                    </InputLabel>
 
+                    <Select
+                        value={selectedSite}
+                        label="Select Site"
+                        onChange={(e) =>
+                            setSelectedSite(e.target.value)
+                        }
+                    >
+                        {sites.map((site) => (
+                            <MenuItem
+                                key={site.id}
+                                value={site.id}
+                            >
+                                {site.site_name}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+            </Box>
+
+            {/* ERROR */}
+
+            {error && (
+                <Alert
+                    severity="warning"
+                    sx={{ mb: 3 }}
+                >
+                    {error}
+                </Alert>
+            )}
+
+            {analytics && recommendation && (
+                <>
+
+                    {/* KPI CARDS */}
+
+                    <Grid
+                        container
+                        spacing={3}
+                    >
+
+                        <Grid
+                            item
+                            xs={12}
+                            md={3}
+                        >
+                            <StatsCard
+                                title="Average Predicted Power"
+                                value={`${analytics.average_predicted_power} W`}
+                                icon={<WbSunnyIcon />}
+                                color="#F9A825"
+                            />
+                        </Grid>
+
+                        <Grid
+                            item
+                            xs={12}
+                            md={3}
+                        >
+                            <StatsCard
+                                title="Average Solar Score"
+                                value={`${analytics.average_solar_score}%`}
+                                icon={<WbSunnyIcon />}
+                                color="#FB8C00"
+                            />
+                        </Grid>
+
+                        <Grid
+                            item
+                            xs={12}
+                            md={3}
+                        >
+                            <StatsCard
+                                title="Average Wind Score"
+                                value={`${analytics.average_wind_score}%`}
+                                icon={<AirIcon />}
+                                color="#00897B"
+                            />
+                        </Grid>
+
+                        <Grid
+                            item
+                            xs={12}
+                            md={3}
+                        >
+                            <StatsCard
+                                title="Best Energy Source"
+                                value={analytics.best_energy_source}
+                                icon={<EmojiEventsIcon />}
+                                color="#8E24AA"
+                            />
+                        </Grid>
+
+                    </Grid>
+
+                    {/* PREDICTION SUMMARY */}
+
+                    <Box mt={4}>
+                        <Alert severity="info">
+
+                            <strong>
+                                {analytics.total_predictions}
+                            </strong>{" "}
+                            predictions have been generated
+                            for this site.
+
+                            {" "}Current recommendation:
+
+                            {" "}
+
+                            <strong>
+                                {
+                                    analytics.latest_prediction
+                                        .recommendation
+                                }
+                            </strong>
+
+                        </Alert>
+                    </Box>
+
+                    {/* BEST SITE / RECOMMENDATION */}
+
+                    <Box mt={5}>
+
+                        <TopSiteCard
+                            site={
+                                sites.find(
+                                    (site) =>
+                                        site.id ===
+                                        Number(selectedSite)
+                                )
+                            }
+                            recommendation={recommendation}
+                        />
+
+                    </Box>
+
+                    {/* PERFORMANCE + HISTORY */}
+
+                    <Box mt={5}>
+
+                        <PredictionChart
+                            analytics={analytics}
+                            history={history}
+                        />
+
+                    </Box>
+
+                </>
+            )}
+
+        </DashboardLayout>
     );
-
-  }
-
-  return (
-
-    <DashboardLayout>
-
-      <Typography
-        variant="h4"
-        fontWeight={700}
-        mb={4}
-      >
-        Renewable Resource Analytics
-      </Typography>
-
-      <Grid container spacing={3}>
-
-        <Grid item xs={12} md={3}>
-
-          <StatsCard
-            title="Total Sites"
-            value={sites.length}
-            icon={<PlaceIcon />}
-            color="#1565C0"
-          />
-
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-
-          <StatsCard
-            title="Average Solar Score"
-            value={`${averageSolar}%`}
-            icon={<WbSunnyIcon />}
-            color="#F9A825"
-          />
-
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-
-          <StatsCard
-            title="Average Wind Score"
-            value={`${averageWind}%`}
-            icon={<AirIcon />}
-            color="#00897B"
-          />
-
-        </Grid>
-
-        <Grid item xs={12} md={3}>
-
-          <StatsCard
-            title="Best Site"
-            value={bestSite ? bestSite.site_name : "-"}
-            icon={<EmojiEventsIcon />}
-            color="#8E24AA"
-          />
-
-        </Grid>
-
-      </Grid>
-
-      <Box mt={5}>
-
-        <TopSiteCard site={bestSite} />
-
-      </Box>
-
-      <Box mt={5}>
-
-        <PredictionChart />
-
-      </Box>
-
-    </DashboardLayout>
-
-  );
-
 }
 
 export default Analytics;
