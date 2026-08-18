@@ -700,3 +700,41 @@
   }
 
 }
+.input-icon,
+.role-icon,
+.option-icon,
+.password-toggle,
+.dropdown-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-icon svg,
+.role-icon svg,
+.option-icon svg,
+.password-toggle svg,
+.dropdown-arrow svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+.password-toggle {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.register-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.role-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

@@ -13,6 +13,10 @@ import Prediction from "./pages/Prediction/Prediction";
 import Analytics from "./pages/Analytics/Analytics";
 
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import ResourceAssessment from "./pages/ResourceAssessment/ResourceAssessment";
+import RenewableDashboard from "./pages/RenewableDashboard/RenewableDashboard";
+import ExecutiveDashboard from "./pages/ExecutiveDashboard/ExecutiveDashboard";
+import LocationAssessment from "./pages/LocationAssessment/LocationAssessment";
 
 function App() {
   return (
@@ -92,6 +96,15 @@ function App() {
   }
 />
 
+<Route
+  path="/renewable-dashboard"
+  element={
+    <ProtectedRoute>
+      <RenewableDashboard />
+    </ProtectedRoute>
+  }
+/>
+
         <Route
           path="/analytics"
           element={
@@ -100,6 +113,32 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+  path="/resource-assessment"
+  element={
+    <ProtectedRoute>
+      <ResourceAssessment />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/executive-dashboard"
+  element={
+    <ProtectedRoute>
+      <ExecutiveDashboard />
+    </ProtectedRoute>
+  }
+/>
+<Route
+  path="/location-assessment"
+  element={
+    <ProtectedRoute>
+      <LocationAssessment />
+    </ProtectedRoute>
+  }
+/>
 
       </Routes>
     </BrowserRouter>

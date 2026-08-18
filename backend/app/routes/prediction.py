@@ -30,6 +30,9 @@ from app.services.deployment_optimization_service import (
 from app.services.forecasting_service import (
     generate_solar_forecast
 )
+from app.services.investment_service import (
+    generate_investment_recommendation
+)
 
 router = APIRouter(
     prefix="/prediction",
@@ -1012,4 +1015,144 @@ def get_site_recommendation(
         "strengths": strengths,
         "weaknesses": weaknesses,
         "suggestion": suggestion
+    }
+
+# --------------------------------------------------
+# Investment Recommendation
+# --------------------------------------------------
+
+@router.get("/investment/{site_id}")
+def get_investment_recommendation(
+    site_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    # ----------------------------------------------
+    # Get Site
+    # ----------------------------------------------
+
+    site = (
+        db.query(Site)
+        .filter(Site.id == site_id)
+        .first()
+    )
+
+    if not site:
+        raise HTTPException(
+            status_code=404,
+            detail="Site not found"
+        )
+
+    # ----------------------------------------------
+    # Validate Coordinates
+    # ----------------------------------------------
+
+    if site.latitude is None or site.longitude is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Site latitude and longitude are required"
+        )
+
+    # ----------------------------------------------
+    # Get Latest Environmental Data
+    # ----------------------------------------------
+
+    environment = (
+        db.query(EnvironmentalData)
+        .filter(
+            EnvironmentalData.site_id == site_id
+        )
+        .order_by(
+            EnvironmentalData.recorded_at.desc()
+        )
+        .first()
+    )
+
+    if not environment:
+        raise HTTPException(
+            status_code=404,
+            detail="Environmental data not found"
+        )
+
+    # ----------------------------------------------
+    # Get Live Weather
+    # ----------------------------------------------
+
+    try:
+
+        weather = get_live_weather(
+            site.latitude,
+            site.longitude
+        )
+
+    except Exception as exc:
+
+        print(
+            "Investment recommendation weather error:",
+            exc
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Unable to retrieve live environmental data"
+        )
+
+    # ----------------------------------------------
+    # Validate Wind Speed
+    # ----------------------------------------------
+
+    wind_speed = weather.get("wind_speed")
+
+    if wind_speed is None:
+        raise HTTPException(
+            status_code=502,
+            detail="Wind speed data unavailable"
+        )
+
+    # ----------------------------------------------
+    # Generate Site Intelligence
+    # ----------------------------------------------
+
+    intelligence = generate_site_insight(
+        environment,
+        wind_speed
+    )
+
+    # ----------------------------------------------
+    # Generate Investment Recommendation
+    # ----------------------------------------------
+
+    investment = generate_investment_recommendation(
+        solar_score=intelligence["solar_score"],
+        wind_score=intelligence["wind_score"],
+        overall_score=intelligence["overall_score"],
+        best_energy_source=intelligence["best_energy_source"],
+        suitability=intelligence["suitability"],
+        deployment_priority=intelligence["deployment_priority"]
+    )
+
+    # ----------------------------------------------
+    # Response
+    # ----------------------------------------------
+
+    return {
+        "site_id": site_id,
+
+        "site": {
+            "name": site.site_name,
+            "latitude": site.latitude,
+            "longitude": site.longitude
+        },
+
+        "site_intelligence": {
+            "solar_score": intelligence["solar_score"],
+            "wind_score": intelligence["wind_score"],
+            "overall_score": intelligence["overall_score"],
+            "best_energy_source": intelligence["best_energy_source"],
+            "suitability": intelligence["suitability"],
+            "deployment_priority": intelligence["deployment_priority"]
+        },
+
+        "investment": investment
     }
