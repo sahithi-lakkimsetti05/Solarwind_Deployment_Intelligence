@@ -719,3 +719,696 @@
   }
 
 }
+
+/* =========================================================
+   INVESTMENT RECOMMENDATION
+========================================================= */
+
+.investment-card {
+  background: white;
+  border-radius: 18px;
+  padding: 25px;
+  margin-bottom: 22px;
+
+  box-shadow:
+    0 8px 25px rgba(0, 0, 0, 0.06);
+}
+
+
+/* =========================================================
+   INVESTMENT HEADER
+========================================================= */
+
+.investment-heading {
+  margin-bottom: 25px;
+}
+
+.investment-heading > svg {
+  color: #059669;
+}
+
+
+/* =========================================================
+   INVESTMENT SUMMARY
+========================================================= */
+
+.investment-summary-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 18px;
+
+  margin-bottom: 22px;
+}
+
+
+.investment-item {
+  background: #f8fafc;
+
+  border: 1px solid #edf2f7;
+
+  border-radius: 14px;
+
+  padding: 18px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  transition: 0.2s;
+}
+
+
+.investment-item:hover {
+  transform: translateY(-2px);
+
+  border-color: #dbeafe;
+
+  box-shadow:
+    0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+
+.investment-item-icon {
+  width: 45px;
+  height: 45px;
+
+  flex-shrink: 0;
+
+  border-radius: 12px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  background: #ecfdf5;
+
+  color: #059669;
+}
+
+
+.investment-item span {
+  display: block;
+
+  color: #718096;
+
+  font-size: 13px;
+
+  margin-bottom: 5px;
+}
+
+
+.investment-item strong {
+  display: block;
+
+  color: #1a202c;
+
+  font-size: 17px;
+}
+
+
+/* =========================================================
+   INVESTMENT SCORE
+========================================================= */
+
+.investment-score {
+  background: linear-gradient(
+    135deg,
+    #eff6ff,
+    #ecfdf5
+  );
+
+  border-radius: 15px;
+
+  padding: 22px;
+
+  margin-bottom: 22px;
+
+  border: 1px solid #dbeafe;
+}
+
+
+.investment-score > div:first-child {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 12px;
+}
+
+
+.investment-score span {
+  color: #4a5568;
+
+  font-weight: 600;
+}
+
+
+.investment-score strong {
+  color: #1d4ed8;
+
+  font-size: 30px;
+}
+
+
+.investment-score strong small {
+  font-size: 16px;
+
+  color: #718096;
+
+  margin-left: 3px;
+}
+
+
+.investment-score-bar {
+  width: 100%;
+
+  height: 10px;
+
+  background: #e2e8f0;
+
+  border-radius: 20px;
+
+  overflow: hidden;
+}
+
+
+.investment-score-fill {
+  height: 100%;
+
+  background: linear-gradient(
+    90deg,
+    #2563eb,
+    #059669
+  );
+
+  border-radius: 20px;
+
+  transition: width 0.6s ease;
+}
+
+
+/* =========================================================
+   INVESTMENT CONTENT
+========================================================= */
+
+.investment-content-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 18px;
+
+  margin-bottom: 20px;
+}
+
+
+.investment-text-card {
+  background: #f8fafc;
+
+  border: 1px solid #edf2f7;
+
+  border-radius: 14px;
+
+  padding: 20px;
+}
+
+
+.investment-text-card h3 {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  margin: 0 0 12px;
+
+  color: #1a202c;
+
+  font-size: 17px;
+}
+
+
+.investment-text-card h3 svg {
+  color: #2563eb;
+}
+
+
+.investment-text-card p {
+  margin: 0;
+
+  color: #4a5568;
+
+  line-height: 1.6;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   AI INVESTMENT RECOMMENDATION
+========================================================= */
+
+.investment-highlight {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 15px;
+
+  padding: 20px;
+
+  border-radius: 14px;
+
+  background: #eff6ff;
+
+  border-left: 4px solid #2563eb;
+
+  margin-bottom: 18px;
+}
+
+
+.investment-highlight-icon {
+  width: 45px;
+  height: 45px;
+
+  flex-shrink: 0;
+
+  border-radius: 12px;
+
+  background: #dbeafe;
+
+  color: #2563eb;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+
+.investment-highlight strong {
+  display: block;
+
+  color: #1d4ed8;
+
+  font-size: 15px;
+
+  margin-bottom: 7px;
+}
+
+
+.investment-highlight p {
+  margin: 0;
+
+  color: #374151;
+
+  line-height: 1.6;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   NEXT STEP
+========================================================= */
+
+.investment-next-step {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 15px;
+
+  padding: 20px;
+
+  border-radius: 14px;
+
+  background: #ecfdf5;
+
+  border-left: 4px solid #059669;
+}
+
+
+.next-step-icon {
+  width: 45px;
+  height: 45px;
+
+  flex-shrink: 0;
+
+  border-radius: 12px;
+
+  background: #d1fae5;
+
+  color: #059669;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+
+.investment-next-step strong {
+  display: block;
+
+  color: #047857;
+
+  font-size: 15px;
+
+  margin-bottom: 7px;
+}
+
+
+.investment-next-step p {
+  margin: 0;
+
+  color: #374151;
+
+  line-height: 1.6;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   INVESTMENT RESPONSIVE
+========================================================= */
+
+@media (max-width: 1000px) {
+
+  .investment-summary-grid {
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+}
+
+
+@media (max-width: 800px) {
+
+  .investment-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .investment-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .investment-card {
+    padding: 20px;
+  }
+
+  .investment-score > div:first-child {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .investment-score strong {
+    font-size: 25px;
+  }
+
+}
+/* =====================================================
+   DEPLOYMENT OPTIMIZATION
+===================================================== */
+
+.deployment-optimization-card {
+  margin-top: 28px;
+  padding: 30px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+
+/* HEADER */
+
+.deployment-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 26px;
+}
+
+.deployment-title-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.deployment-header h2 {
+  margin: 0;
+  font-size: 23px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.deployment-header p {
+  margin: 5px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+
+/* SOURCE BANNER */
+
+.deployment-source-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 35px;
+  padding: 24px;
+  margin-bottom: 25px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.deployment-source-banner > svg {
+  color: #64748b;
+}
+
+.deployment-source-main,
+.deployment-source-alternative {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.deployment-source-main span,
+.deployment-source-alternative span {
+  font-size: 12px;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.deployment-source-main strong {
+  font-size: 24px;
+  color: #16a34a;
+}
+
+.deployment-source-alternative strong {
+  font-size: 20px;
+  color: #475569;
+}
+
+
+/* METRICS */
+
+.deployment-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+.deployment-item {
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #fafafa;
+}
+
+.deployment-item-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 13px;
+  background: #f1f5f9;
+  color: #4f46e5;
+}
+
+.deployment-item span {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 7px;
+}
+
+.deployment-item strong {
+  display: block;
+  font-size: 17px;
+  color: #111827;
+}
+
+
+/* TEXT SECTIONS */
+
+.deployment-text-section {
+  padding: 20px;
+  margin-top: 18px;
+  border-radius: 14px;
+  background: #f8fafc;
+  border-left: 4px solid #4f46e5;
+}
+
+.deployment-text-section h3 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #111827;
+}
+
+.deployment-text-section p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+
+/* AI HIGHLIGHT */
+
+.deployment-highlight {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 14px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+}
+
+.deployment-highlight-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #4f46e5;
+}
+
+.deployment-highlight strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #312e81;
+  font-size: 15px;
+}
+
+.deployment-highlight p {
+  margin: 0;
+  color: #4338ca;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+
+/* WIND RESOURCE */
+
+.wind-resource-summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.wind-resource-summary > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.wind-resource-summary svg {
+  color: #0284c7;
+}
+
+.wind-resource-summary span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.wind-resource-summary strong {
+  margin-left: auto;
+  font-size: 15px;
+  color: #111827;
+}
+
+
+/* RESPONSIVE */
+
+@media (max-width: 1000px) {
+
+  .deployment-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+@media (max-width: 650px) {
+
+  .deployment-optimization-card {
+    padding: 20px;
+  }
+
+  .deployment-source-banner {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+
+  .deployment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wind-resource-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .wind-resource-summary > div {
+    flex-wrap: wrap;
+  }
+
+}
