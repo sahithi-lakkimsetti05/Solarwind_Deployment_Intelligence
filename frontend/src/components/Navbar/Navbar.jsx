@@ -1,50 +1,81 @@
 import styles from "./Navbar.module.css";
 
 import {
-    Bell,
-    Search
+  Bell,
+  Search,
+  LogOut,
 } from "lucide-react";
 
-function Navbar(){
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
-    return(
+function Navbar() {
+  const navigate = useNavigate();
 
-        <header className={styles.navbar}>
+  const { logout } = useAuth();
 
-            <div>
+  const handleLogout = () => {
+    const confirmLogout = window.confirm(
+      "Are you sure you want to logout?"
+    );
 
-                <h2>Good Morning 👋</h2>
+    if (!confirmLogout) {
+      return;
+    }
 
-                <p>
-                    Renewable Energy Intelligence Platform
-                </p>
+    logout();
 
-            </div>
+    navigate("/");
+  };
 
-            <div className={styles.right}>
+  return (
+    <header className={styles.navbar}>
 
-                <div className={styles.search}>
+      {/* LEFT SIDE */}
+      <div>
+        <h2>Good Morning 👋</h2>
 
-                    <Search size={18}/>
+        <p>
+          Renewable Energy Intelligence Platform
+        </p>
+      </div>
 
-                    <input
-                        placeholder="Search projects..."
-                    />
+      {/* RIGHT SIDE */}
+      <div className={styles.right}>
 
-                </div>
+        {/* Search */}
+        <div className={styles.search}>
 
-                <Bell className={styles.icon}/>
+          <Search size={18} />
 
-                <div className={styles.avatar}>
-                    S
-                </div>
+          <input
+            placeholder="Search projects..."
+          />
 
-            </div>
+        </div>
 
-        </header>
+        {/* Notifications */}
+        <Bell className={styles.icon} />
 
-    )
+        {/* User */}
+        <div className={styles.avatar}>
+          S
+        </div>
 
+        {/* Logout */}
+        <button
+          className={styles.logout}
+          onClick={handleLogout}
+          title="Logout"
+        >
+          <LogOut size={18} />
+          <span>Logout</span>
+        </button>
+
+      </div>
+
+    </header>
+  );
 }
 
 export default Navbar;

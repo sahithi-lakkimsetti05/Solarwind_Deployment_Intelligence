@@ -99,3 +99,35 @@
     font-weight:bold;
 
 }
+
+.logout {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 9px 14px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.logout:hover {
+  background: #dc2626;
+  color: white;
+
+  transform: translateY(-1px);
+}
+
+.logout:active {
+  transform: translateY(0);
+}

@@ -1,8 +1,8 @@
-import "./Login.css";
+﻿import "./Login.css";
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import Logo from "../../components/Logo/Logo";
 import CustomInput from "../../components/Input/CustomInput";
@@ -26,7 +26,7 @@ function Login() {
 
       localStorage.setItem("token", data.access_token);
 
-      alert("✅ Login Successful!");
+      alert("Γ£à Login Successful!");
 
       navigate("/dashboard");
     } catch (error) {
@@ -65,11 +65,17 @@ function Login() {
         />
 
         <PrimaryButton onClick={handleLogin}>
-          {loading ? "Logging in..." : "Secure Login →"}
+          {loading ? "Logging in..." : "Secure Login ΓåÆ"}
         </PrimaryButton>
 
+        {/* Register Link */}
+        <p className="register-link">
+          Don't have an account?{" "}
+          <Link to="/register">Register here</Link>
+        </p>
+
         <div className="footer">
-          © 2026 SolarWind Deployment Intelligence
+          ┬⌐ 2026 SolarWind Deployment Intelligence
         </div>
       </motion.div>
     </div>

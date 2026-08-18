@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+
 from sqlalchemy import func
 
 from app.core.database import get_db
@@ -8,6 +9,7 @@ from app.core.dependencies import get_current_user
 
 from app.models.environmental_data import EnvironmentalData
 from app.models.prediction_history import PredictionHistory
+from app.models.site import Site
 
 from app.services.prediction_service import (
     calculate_solar_score,
@@ -15,6 +17,19 @@ from app.services.prediction_service import (
 )
 
 from app.services.ml_prediction import predict_solar_power
+from app.services.weather_service import get_live_weather
+from app.services.wind_resource_service import (
+    estimate_wind_resource
+)
+from app.services.site_intelligence_service import (
+    generate_site_insight
+)
+from app.services.deployment_optimization_service import (
+    generate_deployment_optimization
+)
+from app.services.forecasting_service import (
+    generate_solar_forecast
+)
 
 router = APIRouter(
     prefix="/prediction",
@@ -104,6 +119,497 @@ def predict_wind(
         "recommendation": recommendation
     }
 
+# --------------------------------------------------
+# Wind Resource Estimation
+# --------------------------------------------------
+
+@router.get("/wind-resource/{site_id}")
+def estimate_site_wind_resource(
+    site_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    # ----------------------------------------------
+    # Get Site
+    # ----------------------------------------------
+
+    site = (
+        db.query(Site)
+        .filter(Site.id == site_id)
+        .first()
+    )
+
+    if not site:
+        raise HTTPException(
+            status_code=404,
+            detail="Site not found"
+        )
+
+    # ----------------------------------------------
+    # Validate Coordinates
+    # ----------------------------------------------
+
+    if site.latitude is None or site.longitude is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Site latitude and longitude are required"
+        )
+
+    # ----------------------------------------------
+    # Get Live Weather
+    # ----------------------------------------------
+
+    try:
+
+        weather = get_live_weather(
+            site.latitude,
+            site.longitude
+        )
+
+    except Exception as exc:
+
+        print(
+            "Wind weather service error:",
+            exc
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Unable to retrieve live wind data"
+        )
+
+    # ----------------------------------------------
+    # Get Wind Speed
+    # ----------------------------------------------
+
+    wind_speed = weather.get("wind_speed")
+
+    if wind_speed is None:
+        raise HTTPException(
+            status_code=502,
+            detail="Wind speed data unavailable"
+        )
+
+    # ----------------------------------------------
+    # Estimate Wind Resource
+    # ----------------------------------------------
+
+    resource = estimate_wind_resource(
+        wind_speed
+    )
+
+    # ----------------------------------------------
+    # Response
+    # ----------------------------------------------
+
+    return {
+        "site_id": site_id,
+
+        "site": {
+            "name": site.site_name,
+            "latitude": site.latitude,
+            "longitude": site.longitude
+        },
+
+        "wind_resource": resource,
+
+        "environment": {
+            "temperature": weather.get("temperature"),
+            "humidity": weather.get("humidity"),
+            "wind_speed": weather.get("wind_speed"),
+            "air_pressure": weather.get("air_pressure"),
+            "rainfall": weather.get("rainfall")
+        }
+    }
+
+# --------------------------------------------------
+# Site Intelligence Engine
+# --------------------------------------------------
+
+@router.get("/site-intelligence/{site_id}")
+def get_site_intelligence(
+    site_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    # ----------------------------------------------
+    # Get Site
+    # ----------------------------------------------
+
+    site = (
+        db.query(Site)
+        .filter(Site.id == site_id)
+        .first()
+    )
+
+    if not site:
+        raise HTTPException(
+            status_code=404,
+            detail="Site not found"
+        )
+
+    # ----------------------------------------------
+    # Validate Coordinates
+    # ----------------------------------------------
+
+    if site.latitude is None or site.longitude is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Site latitude and longitude are required"
+        )
+
+    # ----------------------------------------------
+    # Get Latest Environmental Data
+    # ----------------------------------------------
+
+    environment = (
+        db.query(EnvironmentalData)
+        .filter(
+            EnvironmentalData.site_id == site_id
+        )
+        .order_by(
+            EnvironmentalData.recorded_at.desc()
+        )
+        .first()
+    )
+
+    if not environment:
+        raise HTTPException(
+            status_code=404,
+            detail="Environmental data not found"
+        )
+
+    # ----------------------------------------------
+    # Get Live Weather
+    # ----------------------------------------------
+
+    try:
+
+        weather = get_live_weather(
+            site.latitude,
+            site.longitude
+        )
+
+    except Exception as exc:
+
+        print(
+            "Site intelligence weather service error:",
+            exc
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Unable to retrieve live environmental data"
+        )
+
+    # ----------------------------------------------
+    # Get Wind Speed
+    # ----------------------------------------------
+
+    wind_speed = weather.get("wind_speed")
+
+    if wind_speed is None:
+        raise HTTPException(
+            status_code=502,
+            detail="Wind speed data unavailable"
+        )
+
+    # ----------------------------------------------
+    # Generate Site Intelligence
+    # ----------------------------------------------
+
+    intelligence = generate_site_insight(
+        environment,
+        wind_speed
+    )
+
+    # ----------------------------------------------
+    # Response
+    # ----------------------------------------------
+
+    return {
+        "site_id": site_id,
+
+        "site": {
+            "name": site.site_name,
+            "latitude": site.latitude,
+            "longitude": site.longitude
+        },
+
+        "site_intelligence": intelligence,
+
+        "environment": {
+            "temperature": weather.get("temperature"),
+            "humidity": weather.get("humidity"),
+            "wind_speed": weather.get("wind_speed"),
+            "air_pressure": weather.get("air_pressure"),
+            "rainfall": weather.get("rainfall"),
+            "cloud": weather.get("cloud"),
+            "irradiance_g": weather.get("irradiance_g"),
+            "irradiance_a": weather.get("irradiance_a")
+        }
+    }
+
+# --------------------------------------------------
+# Deployment Optimization
+# --------------------------------------------------
+
+@router.get("/deployment-optimization/{site_id}")
+def get_deployment_optimization(
+    site_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    # ----------------------------------------------
+    # Get Site
+    # ----------------------------------------------
+
+    site = (
+        db.query(Site)
+        .filter(Site.id == site_id)
+        .first()
+    )
+
+    if not site:
+        raise HTTPException(
+            status_code=404,
+            detail="Site not found"
+        )
+
+    # ----------------------------------------------
+    # Validate Coordinates
+    # ----------------------------------------------
+
+    if site.latitude is None or site.longitude is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Site latitude and longitude are required"
+        )
+
+    # ----------------------------------------------
+    # Get Latest Environmental Data
+    # ----------------------------------------------
+
+    environment = (
+        db.query(EnvironmentalData)
+        .filter(
+            EnvironmentalData.site_id == site_id
+        )
+        .order_by(
+            EnvironmentalData.recorded_at.desc()
+        )
+        .first()
+    )
+
+    if not environment:
+        raise HTTPException(
+            status_code=404,
+            detail="Environmental data not found"
+        )
+
+    # ----------------------------------------------
+    # Get Live Weather
+    # ----------------------------------------------
+
+    try:
+
+        weather = get_live_weather(
+            site.latitude,
+            site.longitude
+        )
+
+    except Exception as exc:
+
+        print(
+            "Deployment optimization weather error:",
+            exc
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Unable to retrieve live environmental data"
+        )
+
+    # ----------------------------------------------
+    # Validate Wind Speed
+    # ----------------------------------------------
+
+    wind_speed = weather.get("wind_speed")
+
+    if wind_speed is None:
+        raise HTTPException(
+            status_code=502,
+            detail="Wind speed data unavailable"
+        )
+
+    # ----------------------------------------------
+    # Generate Site Intelligence
+    # ----------------------------------------------
+
+    intelligence = generate_site_insight(
+        environment,
+        wind_speed
+    )
+
+    # ----------------------------------------------
+    # Generate Deployment Optimization
+    # ----------------------------------------------
+
+    optimization = generate_deployment_optimization(
+        solar_score=intelligence["solar_score"],
+        wind_score=intelligence["wind_score"],
+        overall_score=intelligence["overall_score"],
+        best_energy_source=intelligence["best_energy_source"],
+        suitability=intelligence["suitability"],
+        deployment_priority=intelligence["deployment_priority"],
+        wind_resource=intelligence["wind_resource"]
+    )
+
+    # ----------------------------------------------
+    # Response
+    # ----------------------------------------------
+
+    return {
+        "site_id": site_id,
+
+        "site": {
+            "name": site.site_name,
+            "latitude": site.latitude,
+            "longitude": site.longitude
+        },
+
+        "site_intelligence": {
+            "solar_score": intelligence["solar_score"],
+            "wind_score": intelligence["wind_score"],
+            "overall_score": intelligence["overall_score"],
+            "best_energy_source": intelligence["best_energy_source"],
+            "suitability": intelligence["suitability"],
+            "deployment_priority": intelligence["deployment_priority"]
+        },
+
+        "deployment_optimization": optimization
+    }
+
+# --------------------------------------------------
+# Solar Power Forecast
+# --------------------------------------------------
+
+@router.get("/forecast/{site_id}")
+def get_solar_forecast(
+    site_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+
+    # ----------------------------------------------
+    # Get Site
+    # ----------------------------------------------
+
+    site = (
+        db.query(Site)
+        .filter(Site.id == site_id)
+        .first()
+    )
+
+    if not site:
+        raise HTTPException(
+            status_code=404,
+            detail="Site not found"
+        )
+
+    # ----------------------------------------------
+    # Validate Coordinates
+    # ----------------------------------------------
+
+    if site.latitude is None or site.longitude is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Site latitude and longitude are required"
+        )
+
+    # ----------------------------------------------
+    # Get Live Weather
+    # ----------------------------------------------
+
+    try:
+
+        weather = get_live_weather(
+            site.latitude,
+            site.longitude
+        )
+
+    except Exception as exc:
+
+        print(
+            "Forecast weather service error:",
+            exc
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail="Unable to retrieve live weather data"
+        )
+
+    # ----------------------------------------------
+    # Validate Forecast Inputs
+    # ----------------------------------------------
+
+    required_values = [
+        weather.get("temperature"),
+        weather.get("rainfall"),
+        weather.get("air_pressure"),
+        weather.get("irradiance_g"),
+        weather.get("irradiance_a"),
+        weather.get("cloud")
+    ]
+
+    if any(value is None for value in required_values):
+        raise HTTPException(
+            status_code=502,
+            detail="Incomplete weather or solar data received"
+        )
+
+    # ----------------------------------------------
+    # Generate Forecast
+    # ----------------------------------------------
+
+    forecast = generate_solar_forecast(
+        temperature=weather["temperature"],
+        rainfall=weather["rainfall"],
+        pressure_hpa=weather["air_pressure"],
+        irradiance_g=weather["irradiance_g"],
+        irradiance_a=weather["irradiance_a"],
+        cloud=weather["cloud"]
+    )
+
+    # ----------------------------------------------
+    # Response
+    # ----------------------------------------------
+
+    return {
+        "site_id": site_id,
+
+        "site": {
+            "name": site.site_name,
+            "latitude": site.latitude,
+            "longitude": site.longitude
+        },
+
+        "forecast": forecast,
+
+        "environment": {
+            "temperature": weather["temperature"],
+            "rainfall": weather["rainfall"],
+            "air_pressure": weather["air_pressure"],
+            "cloud": weather["cloud"],
+            "irradiance_g": weather["irradiance_g"],
+            "irradiance_a": weather["irradiance_a"]
+        }
+    }
+
 
 # --------------------------------------------------
 # Machine Learning Solar Prediction
@@ -115,6 +621,73 @@ def predict_ml_solar(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user)
 ):
+
+    # --------------------------------------------------
+    # Get Site
+    # --------------------------------------------------
+
+    site = (
+        db.query(Site)
+        .filter(Site.id == site_id)
+        .first()
+    )
+
+    if not site:
+        raise HTTPException(
+            status_code=404,
+            detail="Site not found"
+        )
+
+    if site.latitude is None or site.longitude is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Site latitude and longitude are required"
+        )
+
+    # --------------------------------------------------
+    # Get Live Weather + Solar Data
+    # --------------------------------------------------
+
+    weather = get_live_weather(
+        site.latitude,
+        site.longitude
+    )
+
+    # --------------------------------------------------
+    # Validate Required ML Inputs
+    # --------------------------------------------------
+
+    required_values = [
+        weather.get("temperature"),
+        weather.get("rainfall"),
+        weather.get("air_pressure"),
+        weather.get("irradiance_g"),
+        weather.get("irradiance_a"),
+        weather.get("cloud")
+    ]
+
+    if any(value is None for value in required_values):
+        raise HTTPException(
+            status_code=502,
+            detail="Incomplete weather or solar data received"
+        )
+
+    # --------------------------------------------------
+    # ML Prediction
+    # --------------------------------------------------
+
+    predicted_power = predict_solar_power(
+        temperature=weather["temperature"],
+        rainfall=weather["rainfall"],
+        pressure_hpa=weather["air_pressure"],
+        irradiance_g=weather["irradiance_g"],
+        irradiance_a=weather["irradiance_a"],
+        cloud=weather["cloud"]
+    )
+
+    # --------------------------------------------------
+    # Get Latest Environmental Data
+    # --------------------------------------------------
 
     environment = (
         db.query(EnvironmentalData)
@@ -129,24 +702,25 @@ def predict_ml_solar(
             detail="Environmental data not found"
         )
 
-    predicted_power = predict_solar_power(
-        temperature=environment.temperature,
-        rainfall=environment.rainfall,
-        rhoa=environment.air_pressure,
-        irradiance_g=environment.solar_irradiance,
-        irradiance_a=environment.solar_irradiance * 1.2,
-        cloud=0.1
-    )
+    # --------------------------------------------------
+    # Rule-Based Scores
+    # --------------------------------------------------
 
     solar_score = calculate_solar_score(environment)
     wind_score = calculate_wind_score(environment)
 
-    overall_score = round((solar_score + wind_score) / 2)
+    overall_score = round(
+        (solar_score + wind_score) / 2
+    )
 
     if solar_score >= wind_score:
         best_energy_source = "Solar"
     else:
         best_energy_source = "Wind"
+
+    # --------------------------------------------------
+    # Recommendation
+    # --------------------------------------------------
 
     if overall_score >= 85:
         recommendation = "Excellent"
@@ -156,6 +730,10 @@ def predict_ml_solar(
         recommendation = "Moderate"
     else:
         recommendation = "Poor"
+
+    # --------------------------------------------------
+    # Save Prediction History
+    # --------------------------------------------------
 
     history = PredictionHistory(
         site_id=site_id,
@@ -172,6 +750,10 @@ def predict_ml_solar(
     db.commit()
     db.refresh(history)
 
+    # --------------------------------------------------
+    # Response
+    # --------------------------------------------------
+
     return {
         "site_id": site_id,
         "model": "Random Forest",
@@ -180,9 +762,16 @@ def predict_ml_solar(
         "wind_score": wind_score,
         "overall_score": overall_score,
         "best_energy_source": best_energy_source,
-        "recommendation": recommendation
+        "recommendation": recommendation,
+        "live_environment": {
+            "temperature": weather["temperature"],
+            "rainfall": weather["rainfall"],
+            "air_pressure": weather["air_pressure"],
+            "cloud": weather["cloud"],
+            "irradiance_g": weather["irradiance_g"],
+            "irradiance_a": weather["irradiance_a"]
+        }
     }
-
 
 # --------------------------------------------------
 # Prediction History

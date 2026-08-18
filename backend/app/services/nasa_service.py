@@ -1,20 +1,26 @@
 import requests
+from datetime import date, timedelta
 
 BASE_URL = "https://power.larc.nasa.gov/api/temporal/daily/point"
 
 
 def get_solar_data(latitude: float, longitude: float):
     """
-    Fetch solar irradiance from NASA POWER API
+    Fetch recent solar irradiance from NASA POWER API.
+    Uses yesterday's date because NASA daily data can have
+    a reporting delay.
     """
+
+    target_date = date.today() - timedelta(days=1)
+    date_string = target_date.strftime("%Y%m%d")
 
     params = {
         "parameters": "ALLSKY_SFC_SW_DWN",
         "community": "RE",
         "longitude": longitude,
         "latitude": latitude,
-        "start": "20250101",
-        "end": "20250101",
+        "start": date_string,
+        "end": date_string,
         "format": "JSON"
     }
 
