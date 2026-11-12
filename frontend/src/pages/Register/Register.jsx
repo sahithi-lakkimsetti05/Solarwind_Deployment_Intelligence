@@ -4,6 +4,22 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import {
+  User,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  ChevronDown,
+  UserRound,
+  Map,
+  BriefcaseBusiness,
+  Shield,
+  X,
+  ArrowRight,
+} from "lucide-react";
+
 import Logo from "../../components/Logo/Logo";
 import { registerUser } from "../../services/authService";
 
@@ -17,15 +33,29 @@ function Register() {
   const [role, setRole] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] =
+    useState(false);
+
   const [roleOpen, setRoleOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const roles = [
-    "Planner",
-    "GIS Analyst",
-    "Project Manager",
-    "Admin",
+    {
+      name: "Planner",
+      icon: BriefcaseBusiness,
+    },
+    {
+      name: "GIS Analyst",
+      icon: Map,
+    },
+    {
+      name: "Project Manager",
+      icon: UserRound,
+    },
+    {
+      name: "Admin",
+      icon: Shield,
+    },
   ];
 
   const handleRegister = async () => {
@@ -55,16 +85,19 @@ function Register() {
         role
       );
 
-      alert("Γ£à Account created successfully!");
+      alert("Account created successfully!");
 
       navigate("/");
+
     } catch (error) {
       console.error("Registration error:", error);
 
       alert(
-        error.message ||
+        error.response?.data?.detail ||
+          error.message ||
           "Registration failed. Please try again."
       );
+
     } finally {
       setLoading(false);
     }
@@ -95,17 +128,18 @@ function Register() {
 
         {/* Heading */}
         <div className="register-heading">
-
           <h2>Create Your Account</h2>
 
           <p>
             Join the Solar & Wind Deployment Intelligence
             Platform
           </p>
-
         </div>
 
-        {/* Full Name */}
+        {/* =========================
+            FULL NAME
+        ========================= */}
+
         <div className="register-input-box">
 
           <label>Full Name</label>
@@ -113,7 +147,7 @@ function Register() {
           <div className="input-wrapper">
 
             <span className="input-icon">
-              ≡ƒæñ
+              <User size={19} />
             </span>
 
             <input
@@ -129,7 +163,10 @@ function Register() {
 
         </div>
 
-        {/* Email */}
+        {/* =========================
+            EMAIL
+        ========================= */}
+
         <div className="register-input-box">
 
           <label>Email</label>
@@ -137,7 +174,7 @@ function Register() {
           <div className="input-wrapper">
 
             <span className="input-icon">
-              Γ£ë
+              <Mail size={19} />
             </span>
 
             <input
@@ -153,7 +190,10 @@ function Register() {
 
         </div>
 
-        {/* Password */}
+        {/* =========================
+            PASSWORD
+        ========================= */}
+
         <div className="register-input-box">
 
           <label>Password</label>
@@ -161,7 +201,7 @@ function Register() {
           <div className="input-wrapper">
 
             <span className="input-icon">
-              ≡ƒöÆ
+              <Lock size={19} />
             </span>
 
             <input
@@ -184,14 +224,21 @@ function Register() {
                 setShowPassword(!showPassword)
               }
             >
-              {showPassword ? "Γùë" : "Γùî"}
+              {showPassword ? (
+                <EyeOff size={19} />
+              ) : (
+                <Eye size={19} />
+              )}
             </button>
 
           </div>
 
         </div>
 
-        {/* Confirm Password */}
+        {/* =========================
+            CONFIRM PASSWORD
+        ========================= */}
+
         <div className="register-input-box">
 
           <label>Confirm Password</label>
@@ -199,7 +246,7 @@ function Register() {
           <div className="input-wrapper">
 
             <span className="input-icon">
-              ≡ƒöÆ
+              <Lock size={19} />
             </span>
 
             <input
@@ -224,14 +271,21 @@ function Register() {
                 )
               }
             >
-              {showConfirmPassword ? "Γùë" : "Γùî"}
+              {showConfirmPassword ? (
+                <EyeOff size={19} />
+              ) : (
+                <Eye size={19} />
+              )}
             </button>
 
           </div>
 
         </div>
 
-        {/* Role */}
+        {/* =========================
+            ROLE
+        ========================= */}
+
         <div className="register-input-box role-box">
 
           <label>Role</label>
@@ -248,7 +302,7 @@ function Register() {
             <div className="select-display">
 
               <span className="role-icon">
-                ≡ƒæÑ
+                <ShieldCheck size={19} />
               </span>
 
               <span
@@ -266,14 +320,16 @@ function Register() {
                   roleOpen ? "rotate" : ""
                 }`}
               >
-                Γû╛
+                <ChevronDown size={19} />
               </span>
 
             </div>
 
+            {/* Role options */}
             {roleOpen && (
               <div className="role-options">
 
+                {/* Clear selection */}
                 <div
                   className="role-option placeholder-option"
                   onClick={(e) => {
@@ -282,36 +338,44 @@ function Register() {
                     setRoleOpen(false);
                   }}
                 >
-                  <span>Γùî</span>
-                  Select your role
+
+                  <span className="option-icon">
+                    <X size={17} />
+                  </span>
+
+                  <span>
+                    Select your role
+                  </span>
+
                 </div>
 
-                {roles.map((item) => (
-                  <div
-                    key={item}
-                    className={`role-option ${
-                      role === item
-                        ? "selected-option"
-                        : ""
-                    }`}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setRole(item);
-                      setRoleOpen(false);
-                    }}
-                  >
+                {/* Roles */}
+                {roles.map(
+                  ({ name, icon: RoleIcon }) => (
+                    <div
+                      key={name}
+                      className={`role-option ${
+                        role === name
+                          ? "selected-option"
+                          : ""
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
 
-                    <span className="option-icon">
-                      {item === "Planner" && "≡ƒôà"}
-                      {item === "GIS Analyst" && "≡ƒîÉ"}
-                      {item === "Project Manager" && "≡ƒÆ╝"}
-                      {item === "Admin" && "≡ƒ¢í"}
-                    </span>
+                        setRole(name);
+                        setRoleOpen(false);
+                      }}
+                    >
 
-                    <span>{item}</span>
+                      <span className="option-icon">
+                        <RoleIcon size={17} />
+                      </span>
 
-                  </div>
-                ))}
+                      <span>{name}</span>
+
+                    </div>
+                  )
+                )}
 
               </div>
             )}
@@ -320,20 +384,31 @@ function Register() {
 
         </div>
 
-        {/* Register button */}
+        {/* =========================
+            REGISTER BUTTON
+        ========================= */}
+
         <button
           className="register-btn"
           onClick={handleRegister}
           disabled={loading}
         >
 
-          {loading
-            ? "Creating Account..."
-            : "Create Account ΓåÆ"}
+          {loading ? (
+            "Creating Account..."
+          ) : (
+            <>
+              Create Account
+              <ArrowRight size={19} />
+            </>
+          )}
 
         </button>
 
-        {/* Login */}
+        {/* =========================
+            LOGIN
+        ========================= */}
+
         <p className="login-redirect">
 
           Already have an account?{" "}
@@ -344,13 +419,16 @@ function Register() {
 
         </p>
 
-        {/* Footer */}
+        {/* =========================
+            FOOTER
+        ========================= */}
+
         <div className="register-footer">
 
           <div className="footer-line"></div>
 
           <span>
-            ┬⌐ 2026 SolarWind Deployment Intelligence
+            © 2026 SolarWind Deployment Intelligence
           </span>
 
         </div>

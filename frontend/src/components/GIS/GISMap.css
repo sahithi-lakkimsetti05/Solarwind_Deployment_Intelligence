@@ -1,0 +1,371 @@
+.gis-wrapper {
+  width: 100%;
+}
+
+
+/* =========================================
+   SUMMARY CARDS
+========================================= */
+
+.gis-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.gis-summary-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  border: 1px solid #eef2f7;
+}
+
+.gis-summary-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8f1ff;
+  color: #1565c0;
+}
+
+.gis-summary-icon.solar {
+  background: #fff7df;
+  color: #e89b00;
+}
+
+.gis-summary-icon.wind {
+  background: #e8f7ff;
+  color: #0284c7;
+}
+
+.gis-summary-icon.intelligence {
+  background: #eaf8ef;
+  color: #15803d;
+}
+
+.gis-summary-card span {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
+
+.gis-summary-card strong {
+  display: block;
+  font-size: 27px;
+  color: #0f172a;
+}
+
+
+/* =========================================
+   MAP
+========================================= */
+
+.gis-map-container {
+  position: relative;
+  background: #ffffff;
+  padding: 10px;
+  border-radius: 22px;
+  box-shadow: 0 15px 40px rgba(15, 23, 42, 0.09);
+}
+
+
+/* =========================================
+   LEGEND
+========================================= */
+
+.gis-legend {
+  position: absolute;
+  z-index: 1000;
+  bottom: 25px;
+  right: 25px;
+  background: rgba(255, 255, 255, 0.96);
+  padding: 16px 18px;
+  border-radius: 14px;
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.18);
+  min-width: 150px;
+}
+
+.gis-legend h4 {
+  margin: 0 0 10px;
+  color: #0f172a;
+}
+
+.gis-legend div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 7px 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+.legend-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot.excellent {
+  background: #16a34a;
+}
+
+.legend-dot.good {
+  background: #2563eb;
+}
+
+.legend-dot.moderate {
+  background: #f59e0b;
+}
+
+.legend-dot.low {
+  background: #ef4444;
+}
+
+
+/* =========================================
+   LOADING
+========================================= */
+
+.gis-loading {
+  min-height: 450px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 22px;
+  color: #64748b;
+  text-align: center;
+}
+
+.gis-loading h3 {
+  color: #0f172a;
+  margin: 18px 0 5px;
+}
+
+.gis-loading p {
+  margin: 0;
+}
+
+.gis-spinner {
+  animation: gis-spin 1s linear infinite;
+  color: #1565c0;
+}
+
+@keyframes gis-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================
+   ERROR
+========================================= */
+
+.gis-error {
+  min-height: 420px;
+  background: #ffffff;
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  color: #ef4444;
+}
+
+.gis-error h3 {
+  color: #0f172a;
+  margin: 15px 0 8px;
+}
+
+.gis-error p {
+  color: #64748b;
+  max-width: 500px;
+}
+
+.gis-retry-button {
+  margin-top: 15px;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 22px;
+  background: #1565c0;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.gis-retry-button:hover {
+  background: #0d47a1;
+}
+
+
+/* =========================================
+   SELECTED SITE
+========================================= */
+
+.gis-selected-site {
+  margin-top: 22px;
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 25px;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+  border: 1px solid #eef2f7;
+}
+
+.selected-site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.selected-site-header span {
+  color: #1565c0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.selected-site-header h2 {
+  margin: 5px 0 0;
+  color: #0f172a;
+}
+
+.selected-site-header button {
+  border: none;
+  background: #f1f5f9;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 23px;
+  cursor: pointer;
+  color: #475569;
+}
+
+.selected-site-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.selected-site-grid > div {
+  background: #f8fafc;
+  padding: 18px;
+  border-radius: 14px;
+}
+
+.selected-site-grid span {
+  display: block;
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.selected-site-grid strong {
+  display: block;
+  font-size: 22px;
+  color: #0f172a;
+}
+
+
+/* =========================================
+   ENVIRONMENT
+========================================= */
+
+.selected-environment {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.selected-environment h3 {
+  margin: 0 0 15px;
+  color: #0f172a;
+}
+
+.environment-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+.environment-grid > div {
+  padding: 15px;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.environment-grid span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.environment-grid strong {
+  color: #0f172a;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1000px) {
+
+  .gis-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .selected-site-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .environment-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .gis-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .selected-site-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .environment-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gis-legend {
+    bottom: 15px;
+    right: 15px;
+  }
+
+}
+

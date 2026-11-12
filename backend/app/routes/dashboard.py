@@ -175,13 +175,13 @@ def dashboard_overview(
         )
 
         top_site = {
-            "site_id": top_prediction.site_id,
-            "site_name": site.site_name if site else "Unknown",
-            "overall_score": top_prediction.overall_score,
-            "predicted_power": top_prediction.predicted_power,
-            "best_energy_source": top_prediction.best_energy_source,
-            "recommendation": top_prediction.recommendation
-        }
+    "site_id": top_prediction.site_id,
+    "site_name": site.site_name if site else "Unknown",
+    "overall_score": top_prediction.overall_score,
+    "predicted_power": top_prediction.predicted_power,
+    "recommendation": top_prediction.recommendation,
+    "best_energy_source": top_prediction.best_energy_source
+}
 
     # -----------------------------
     # Recent Predictions

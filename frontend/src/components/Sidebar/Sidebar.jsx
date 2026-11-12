@@ -1,5 +1,5 @@
 import styles from "./Sidebar.module.css";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 import {
@@ -12,9 +12,15 @@ import {
   Activity,
   LogOut,
   Globe,
+  Wind,
+  Leaf,
+  BriefcaseBusiness,
+  Search,
 } from "lucide-react";
 
 function Sidebar() {
+  const navigate = useNavigate();
+
   return (
     <motion.aside
       className={styles.sidebar}
@@ -22,20 +28,36 @@ function Sidebar() {
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
+
       <div>
-        {/* Logo */}
+
+        {/* =====================================
+            LOGO
+        ===================================== */}
+
         <div className={styles.logoBox}>
-          <div className={styles.logoCircle}>☀</div>
+
+          <div className={styles.logoCircle}>
+            <Sun size={23} />
+          </div>
 
           <div>
             <h2>SolarWind</h2>
-            <span>Deployment Intelligence</span>
+            <span>
+              Deployment Intelligence
+            </span>
           </div>
+
         </div>
 
-        <div className={styles.menuTitle}>MAIN MENU</div>
+        <div className={styles.menuTitle}>
+          MAIN MENU
+        </div>
 
-        {/* Dashboard */}
+        {/* =====================================
+            DASHBOARD
+        ===================================== */}
+
         <NavLink
           to="/dashboard"
           className={({ isActive }) =>
@@ -48,7 +70,26 @@ function Sidebar() {
           Dashboard
         </NavLink>
 
-        {/* Projects */}
+        {/* =====================================
+            EXECUTIVE DASHBOARD
+        ===================================== */}
+
+        <NavLink
+          to="/executive-dashboard"
+          className={({ isActive }) =>
+            isActive
+              ? `${styles.menu} ${styles.active}`
+              : styles.menu
+          }
+        >
+          <BriefcaseBusiness size={20} />
+          Executive Dashboard
+        </NavLink>
+
+        {/* =====================================
+            PROJECTS
+        ===================================== */}
+
         <NavLink
           to="/projects"
           className={({ isActive }) =>
@@ -61,7 +102,10 @@ function Sidebar() {
           Projects
         </NavLink>
 
-        {/* Sites */}
+        {/* =====================================
+            SITES
+        ===================================== */}
+
         <NavLink
           to="/sites"
           className={({ isActive }) =>
@@ -74,7 +118,10 @@ function Sidebar() {
           Sites
         </NavLink>
 
-        {/* Environment */}
+        {/* =====================================
+            ENVIRONMENT
+        ===================================== */}
+
         <NavLink
           to="/environment"
           className={({ isActive }) =>
@@ -87,7 +134,26 @@ function Sidebar() {
           Environment
         </NavLink>
 
-        {/* GIS */}
+        {/* =====================================
+    LOCATION ASSESSMENT
+===================================== */}
+
+<NavLink
+  to="/location-assessment"
+  className={({ isActive }) =>
+    isActive
+      ? `${styles.menu} ${styles.active}`
+      : styles.menu
+  }
+>
+  <Search size={20} />
+  Location Assessment
+</NavLink>
+
+        {/* =====================================
+            GIS
+        ===================================== */}
+
         <NavLink
           to="/gis"
           className={({ isActive }) =>
@@ -100,7 +166,10 @@ function Sidebar() {
           GIS Intelligence
         </NavLink>
 
-        {/* AI Prediction */}
+        {/* =====================================
+            AI PREDICTION
+        ===================================== */}
+
         <NavLink
           to="/prediction"
           className={({ isActive }) =>
@@ -113,7 +182,26 @@ function Sidebar() {
           AI Prediction
         </NavLink>
 
-        {/* Analytics */}
+        {/* =====================================
+            RESOURCE ASSESSMENT
+        ===================================== */}
+
+        <NavLink
+          to="/resource-assessment"
+          className={({ isActive }) =>
+            isActive
+              ? `${styles.menu} ${styles.active}`
+              : styles.menu
+          }
+        >
+          <Wind size={20} />
+          Resource Assessment
+        </NavLink>
+
+        {/* =====================================
+            ANALYTICS
+        ===================================== */}
+
         <NavLink
           to="/analytics"
           className={({ isActive }) =>
@@ -126,30 +214,53 @@ function Sidebar() {
           Analytics
         </NavLink>
 
-        {/* System Health */}
+        {/* =====================================
+            SYSTEM HEALTH
+        ===================================== */}
+
         <div className={styles.healthCard}>
+
           <Activity size={20} />
 
           <div>
             <small>System Health</small>
             <h4>Healthy</h4>
           </div>
+
         </div>
+
       </div>
 
-      {/* Profile */}
+      {/* =====================================
+          PROFILE
+      ===================================== */}
+
       <div className={styles.profileCard}>
+
         <div className={styles.profileLeft}>
-          <div className={styles.avatar}>S</div>
+
+          <div className={styles.avatar}>
+            S
+          </div>
 
           <div>
             <h4>Sahithi</h4>
             <small>Administrator</small>
           </div>
+
         </div>
 
-        <LogOut size={20} className={styles.logout} />
+        <LogOut
+          size={20}
+          className={styles.logout}
+          onClick={() => {
+            localStorage.removeItem("token");
+            navigate("/");
+          }}
+        />
+
       </div>
+
     </motion.aside>
   );
 }

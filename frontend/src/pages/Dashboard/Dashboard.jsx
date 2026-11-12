@@ -14,6 +14,14 @@ import {
   Brain,
   Trophy,
   ArrowRight,
+  BarChart3,
+  Activity,
+  Zap,
+  FileText,
+  Sparkles,
+  TrendingUp,
+  Clock,
+  Target,
 } from "lucide-react";
 
 import { motion } from "framer-motion";
@@ -27,9 +35,9 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ----------------------------------------
+  // =========================================================
   // LOAD DASHBOARD DATA
-  // ----------------------------------------
+  // =========================================================
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -43,7 +51,10 @@ function Dashboard() {
       } catch (err) {
         console.error("Dashboard error:", err);
 
-        setError("Unable to load dashboard data.");
+        setError(
+          err.response?.data?.detail ||
+            "Unable to load dashboard data."
+        );
       } finally {
         setLoading(false);
       }
@@ -52,119 +63,206 @@ function Dashboard() {
     loadDashboard();
   }, []);
 
-  // ----------------------------------------
+  // =========================================================
   // LOADING
-  // ----------------------------------------
+  // =========================================================
 
   if (loading) {
     return (
       <DashboardLayout>
-        <div
-          style={{
-            minHeight: "500px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "18px",
-            fontWeight: "600",
-          }}
-        >
-          Loading dashboard...
+        <div className="dashboard-loading">
+          <div className="loading-icon">
+            <Brain size={32} />
+          </div>
+
+          <h2>Loading Renewable Intelligence...</h2>
+
+          <p>
+            Collecting AI predictions and renewable energy insights.
+          </p>
         </div>
       </DashboardLayout>
     );
   }
 
-  // ----------------------------------------
+  // =========================================================
   // ERROR
-  // ----------------------------------------
+  // =========================================================
 
   if (error) {
     return (
       <DashboardLayout>
-        <div
-          style={{
-            padding: "30px",
-            color: "#b91c1c",
-            background: "#fee2e2",
-            borderRadius: "15px",
-          }}
-        >
-          {error}
+        <div className="dashboard-error">
+          <Activity size={28} />
+
+          <div>
+            <h3>Dashboard Unavailable</h3>
+            <p>{error}</p>
+          </div>
+
+          <button
+            onClick={() => window.location.reload()}
+          >
+            Retry
+          </button>
         </div>
       </DashboardLayout>
     );
   }
 
-  // ----------------------------------------
-  // DASHBOARD DATA
-  // ----------------------------------------
+  // =========================================================
+  // SAFE DATA
+  // =========================================================
 
   const statistics = dashboard?.statistics || {};
 
-  const topSite = dashboard?.top_site;
+  const topSite = dashboard?.top_site || null;
+
+  const recentPredictions =
+    dashboard?.recent_predictions || [];
 
   const energyDistribution =
     dashboard?.energy_distribution || {};
 
+  const totalProjects =
+    Number(statistics.total_projects) || 0;
+
+  const totalSites =
+    Number(statistics.total_sites) || 0;
+
+  const totalPredictions =
+    Number(statistics.total_predictions) || 0;
+
+  const averagePrediction =
+    Number(statistics.average_prediction) || 0;
+
+  const averageSolarScore =
+    Number(statistics.average_solar_score) || 0;
+
+  const averageWindScore =
+    Number(statistics.average_wind_score) || 0;
+
+  const averageOverallScore =
+    Number(statistics.average_overall_score) || 0;
+
+  // =========================================================
+  // ENERGY DISTRIBUTION
+  // =========================================================
+
   const solarCount =
-    energyDistribution.Solar || 0;
+    Number(energyDistribution.Solar) || 0;
 
   const windCount =
-    energyDistribution.Wind || 0;
+    Number(energyDistribution.Wind) || 0;
 
-  const totalEnergyPredictions =
+  const totalEnergyRecommendations =
     solarCount + windCount;
 
   const solarPercentage =
-    totalEnergyPredictions > 0
+    totalEnergyRecommendations > 0
       ? Math.round(
-          (solarCount / totalEnergyPredictions) * 100
+          (solarCount / totalEnergyRecommendations) * 100
         )
       : 0;
 
   const windPercentage =
-    totalEnergyPredictions > 0
+    totalEnergyRecommendations > 0
       ? Math.round(
-          (windCount / totalEnergyPredictions) * 100
+          (windCount / totalEnergyRecommendations) * 100
         )
       : 0;
 
-  // ----------------------------------------
-  // OPEN AI RECOMMENDATION
-  // ----------------------------------------
+  // =========================================================
+  // AI RECOMMENDATION
+  // =========================================================
 
   const openTopSitePrediction = () => {
     if (!topSite?.site_id) {
+      navigate("/prediction");
       return;
     }
 
-    navigate(`/prediction?siteId=${topSite.site_id}`);
+    navigate(
+      `/prediction?siteId=${topSite.site_id}`
+    );
   };
 
-  // ----------------------------------------
+  // =========================================================
+  // RESOURCE ASSESSMENT
+  // =========================================================
+
+  const openResourceAssessment = () => {
+    navigate("/resource-assessment");
+  };
+
+  // =========================================================
+  // FORMAT DATE
+  // =========================================================
+
+  const formatDate = (date) => {
+    if (!date) {
+      return "-";
+    }
+
+    try {
+      return new Date(date).toLocaleString();
+    } catch {
+      return "-";
+    }
+  };
+
+  // =========================================================
+  // SCORE LABEL
+  // =========================================================
+
+  const getScoreLabel = (score) => {
+    if (score >= 85) {
+      return "Excellent";
+    }
+
+    if (score >= 70) {
+      return "Good";
+    }
+
+    if (score >= 50) {
+      return "Moderate";
+    }
+
+    return "Needs Review";
+  };
+
+  // =========================================================
   // DASHBOARD
-  // ----------------------------------------
+  // =========================================================
 
   return (
     <DashboardLayout>
 
-      {/* ========================================
+      {/* =====================================================
           HERO
-      ======================================== */}
+      ===================================================== */}
 
       <motion.div
         className="hero"
-        initial={{ opacity: 0, y: -40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7 }}
+        initial={{
+          opacity: 0,
+          y: -30,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+        }}
+        transition={{
+          duration: 0.7,
+        }}
       >
 
         <div className="heroLeft">
 
-          <p className="date">
-            • Renewable Intelligence Platform
-          </p>
+          <div className="date">
+            <Sparkles size={15} />
+            Renewable Intelligence Platform
+          </div>
 
           <h1>
             Renewable Intelligence
@@ -175,30 +273,40 @@ function Dashboard() {
           </h2>
 
           <p className="heroText">
-            Monitor renewable projects, analyze
-            environmental conditions and receive
-            AI-powered deployment recommendations
+            Monitor renewable projects, evaluate
+            environmental conditions and discover
+            AI-powered deployment opportunities
             in real-time.
           </p>
 
           <div className="heroButtons">
 
-            {/* VIEW PROJECTS */}
-
             <button
               className="primaryBtn"
-              onClick={() => navigate("/projects")}
+              onClick={() =>
+                navigate("/projects")
+              }
             >
+              <FolderKanban size={18} />
               View Projects
             </button>
 
-            {/* AI PREDICTION */}
+            <button
+              className="secondaryBtn"
+              onClick={() =>
+                navigate("/prediction")
+              }
+            >
+              <Brain size={18} />
+              AI Prediction
+            </button>
 
             <button
               className="secondaryBtn"
-              onClick={() => navigate("/prediction")}
+              onClick={openResourceAssessment}
             >
-              AI Prediction
+              <FileText size={18} />
+              Resource Assessment
             </button>
 
           </div>
@@ -208,15 +316,14 @@ function Dashboard() {
         <div className="heroRight">
 
           <div className="energyCircle">
-            ☀
+            <Sun size={68} />
           </div>
 
           <div className="floatingCard">
 
-            <CloudSun size={20} />
+            <CloudSun size={22} />
 
             <div>
-
               <h3>
                 Renewable AI
               </h3>
@@ -224,7 +331,6 @@ function Dashboard() {
               <p>
                 Intelligent Energy Analysis
               </p>
-
             </div>
 
           </div>
@@ -234,9 +340,9 @@ function Dashboard() {
       </motion.div>
 
 
-      {/* ========================================
+      {/* =====================================================
           MAIN KPI CARDS
-      ======================================== */}
+      ===================================================== */}
 
       <div className="cards">
 
@@ -244,19 +350,19 @@ function Dashboard() {
 
         <div className="card solar">
 
-          <Sun size={40} />
+          <Sun size={38} />
 
           <span>
             Average Solar Score
           </span>
 
           <h2>
-            {statistics.average_solar_score || 0}%
+            {averageSolarScore}%
           </h2>
 
           <small>
             <ArrowUpRight size={15} />
-            Renewable Potential
+            {getScoreLabel(averageSolarScore)}
           </small>
 
         </div>
@@ -266,18 +372,19 @@ function Dashboard() {
 
         <div className="card wind">
 
-          <Wind size={40} />
+          <Wind size={38} />
 
           <span>
             Average Wind Score
           </span>
 
           <h2>
-            {statistics.average_wind_score || 0}%
+            {averageWindScore}%
           </h2>
 
           <small>
-            Optimal Potential
+            <TrendingUp size={15} />
+            {getScoreLabel(averageWindScore)}
           </small>
 
         </div>
@@ -287,18 +394,18 @@ function Dashboard() {
 
         <div className="card site">
 
-          <MapPin size={40} />
+          <MapPin size={38} />
 
           <span>
             Total Sites
           </span>
 
           <h2>
-            {statistics.total_sites || 0}
+            {totalSites}
           </h2>
 
           <small>
-            Registered Sites
+            Registered Renewable Sites
           </small>
 
         </div>
@@ -308,14 +415,14 @@ function Dashboard() {
 
         <div className="card project">
 
-          <FolderKanban size={40} />
+          <FolderKanban size={38} />
 
           <span>
             Total Projects
           </span>
 
           <h2>
-            {statistics.total_projects || 0}
+            {totalProjects}
           </h2>
 
           <small>
@@ -327,9 +434,9 @@ function Dashboard() {
       </div>
 
 
-      {/* ========================================
+      {/* =====================================================
           SECONDARY KPI CARDS
-      ======================================== */}
+      ===================================================== */}
 
       <div
         className="cards"
@@ -342,14 +449,14 @@ function Dashboard() {
 
         <div className="card">
 
-          <Brain size={40} />
+          <Brain size={38} />
 
           <span>
             AI Predictions
           </span>
 
           <h2>
-            {statistics.total_predictions || 0}
+            {totalPredictions}
           </h2>
 
           <small>
@@ -363,14 +470,14 @@ function Dashboard() {
 
         <div className="card">
 
-          <Sun size={40} />
+          <Zap size={38} />
 
           <span>
             Average Predicted Power
           </span>
 
           <h2>
-            {statistics.average_prediction || 0} W
+            {averagePrediction} W
           </h2>
 
           <small>
@@ -384,28 +491,28 @@ function Dashboard() {
 
         <div className="card">
 
-          <Trophy size={40} />
+          <Trophy size={38} />
 
           <span>
             Overall Renewable Score
           </span>
 
           <h2>
-            {statistics.average_overall_score || 0}%
+            {averageOverallScore}%
           </h2>
 
           <small>
-            Deployment Suitability
+            {getScoreLabel(averageOverallScore)}
           </small>
 
         </div>
 
 
-        {/* BEST ENERGY SOURCE */}
+        {/* BEST SOURCE */}
 
         <div className="card">
 
-          <CloudSun size={40} />
+          <CloudSun size={38} />
 
           <span>
             Best Energy Source
@@ -424,294 +531,846 @@ function Dashboard() {
       </div>
 
 
-      {/* ========================================
-          BOTTOM CONTENT
-      ======================================== */}
+      {/* =====================================================
+          ANALYTICS SECTION
+      ===================================================== */}
 
-      <div className="bottom">
+      <div className="dashboard-section-grid">
 
-        {/* ======================================
-            ENERGY DISTRIBUTION
-        ====================================== */}
+        {/* ===================================================
+            SOLAR VS WIND
+        =================================================== */}
 
-        <div className="map">
+        <div className="dashboard-panel">
 
-          <h2>
-            🌍 Renewable Energy Distribution
-          </h2>
-
-          <div
-            style={{
-              marginTop: "25px",
-              display: "grid",
-              gap: "20px",
-            }}
-          >
-
-            {/* SOLAR DISTRIBUTION */}
+          <div className="panel-heading">
 
             <div>
+              <h2>
+                Solar vs Wind Performance
+              </h2>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "8px",
-                }}
-              >
+              <p>
+                Average renewable resource suitability
+              </p>
+            </div>
+
+            <BarChart3 size={25} />
+
+          </div>
+
+
+          <div className="comparison-container">
+
+            {/* SOLAR */}
+
+            <div className="comparison-item">
+
+              <div className="comparison-header">
+
+                <div className="comparison-label">
+                  <Sun size={20} />
+                  Solar
+                </div>
 
                 <strong>
-                  ☀ Solar
-                </strong>
-
-                <strong>
-                  {solarCount} predictions
+                  {averageSolarScore}%
                 </strong>
 
               </div>
 
-              <div
-                style={{
-                  height: "14px",
-                  background: "#e5e7eb",
-                  borderRadius: "10px",
-                  overflow: "hidden",
-                }}
-              >
+              <div className="progress-track">
 
                 <div
+                  className="progress-fill solar-fill"
                   style={{
-                    width: `${solarPercentage}%`,
-                    height: "100%",
-                    background: "#f59e0b",
-                    borderRadius: "10px",
+                    width: `${Math.min(
+                      averageSolarScore,
+                      100
+                    )}%`,
                   }}
                 />
 
               </div>
 
               <small>
-                {solarPercentage}% of energy
-                recommendations
+                {getScoreLabel(averageSolarScore)}
               </small>
 
             </div>
 
 
-            {/* WIND DISTRIBUTION */}
+            {/* WIND */}
 
-            <div>
+            <div className="comparison-item">
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "8px",
-                }}
-              >
+              <div className="comparison-header">
 
-                <strong>
-                  🌬 Wind
-                </strong>
+                <div className="comparison-label">
+                  <Wind size={20} />
+                  Wind
+                </div>
 
                 <strong>
-                  {windCount} predictions
+                  {averageWindScore}%
                 </strong>
 
               </div>
 
-              <div
-                style={{
-                  height: "14px",
-                  background: "#e5e7eb",
-                  borderRadius: "10px",
-                  overflow: "hidden",
-                }}
-              >
+              <div className="progress-track">
 
                 <div
+                  className="progress-fill wind-fill"
                   style={{
-                    width: `${windPercentage}%`,
-                    height: "100%",
-                    background: "#00897b",
-                    borderRadius: "10px",
+                    width: `${Math.min(
+                      averageWindScore,
+                      100
+                    )}%`,
                   }}
                 />
 
               </div>
 
               <small>
-                {windPercentage}% of energy
-                recommendations
+                {getScoreLabel(averageWindScore)}
               </small>
 
             </div>
 
+          </div>
 
-            {/* TOTAL */}
 
-            <div
-              className="placeholder"
-              style={{
-                height: "160px",
-                fontSize: "22px",
-              }}
-            >
+          <div className="comparison-summary">
 
-              {statistics.total_predictions || 0} AI
-              predictions analyzed
+            <Target size={20} />
 
-            </div>
+            <span>
+
+              {averageSolarScore >= averageWindScore
+                ? "Solar currently shows stronger average suitability across analyzed sites."
+                : "Wind currently shows stronger average suitability across analyzed sites."}
+
+            </span>
 
           </div>
 
         </div>
 
 
-        {/* ======================================
-            RIGHT PANEL
-        ====================================== */}
+        {/* ===================================================
+            ENERGY DISTRIBUTION
+        =================================================== */}
 
-        <div className="rightPanel">
+        <div className="dashboard-panel">
 
-          {/* ====================================
-              BEST SITE / AI RECOMMENDATION
-          ==================================== */}
+          <div className="panel-heading">
 
-          <div
-            className="ai"
-            onClick={openTopSitePrediction}
-            role={topSite?.site_id ? "button" : undefined}
-            tabIndex={topSite?.site_id ? 0 : undefined}
-            onKeyDown={(event) => {
-              if (
-                topSite?.site_id &&
-                (event.key === "Enter" ||
-                  event.key === " ")
-              ) {
-                event.preventDefault();
-                openTopSitePrediction();
-              }
-            }}
-            style={{
-              cursor: topSite?.site_id
-                ? "pointer"
-                : "default",
-            }}
-          >
+            <div>
+              <h2>
+                Energy Recommendation
+              </h2>
 
-            <h3>
-              🏆 Best Renewable Site
-            </h3>
+              <p>
+                AI-recommended renewable sources
+              </p>
+            </div>
 
-            {topSite ? (
+            <CloudSun size={25} />
 
-              <>
+          </div>
 
-                <h1>
-                  {topSite.site_name}
-                </h1>
 
-                <p>
-                  Overall Score:{" "}
+          <div className="energy-distribution">
+
+            {/* SOLAR */}
+
+            <div className="distribution-item">
+
+              <div className="distribution-top">
+
+                <div>
+                  <Sun size={20} />
+                  Solar
+                </div>
+
+                <strong>
+                  {solarPercentage}%
+                </strong>
+
+              </div>
+
+              <div className="distribution-track">
+
+                <div
+                  className="distribution-fill solar-distribution"
+                  style={{
+                    width: `${solarPercentage}%`,
+                  }}
+                />
+
+              </div>
+
+              <small>
+                {solarCount} recommendations
+              </small>
+
+            </div>
+
+
+            {/* WIND */}
+
+            <div className="distribution-item">
+
+              <div className="distribution-top">
+
+                <div>
+                  <Wind size={20} />
+                  Wind
+                </div>
+
+                <strong>
+                  {windPercentage}%
+                </strong>
+
+              </div>
+
+              <div className="distribution-track">
+
+                <div
+                  className="distribution-fill wind-distribution"
+                  style={{
+                    width: `${windPercentage}%`,
+                  }}
+                />
+
+              </div>
+
+              <small>
+                {windCount} recommendations
+              </small>
+
+            </div>
+
+          </div>
+
+
+          <div className="distribution-total">
+
+            <Brain size={20} />
+
+            <span>
+              {totalEnergyRecommendations} renewable
+              energy recommendations analyzed
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      {/* =====================================================
+          BEST SITE + SYSTEM SUMMARY
+      ===================================================== */}
+
+      <div className="dashboard-section-grid">
+
+        {/* ===================================================
+            BEST RENEWABLE SITE
+        =================================================== */}
+
+        <motion.div
+          className="best-site-panel"
+          whileHover={{
+            y: -3,
+          }}
+          transition={{
+            duration: 0.2,
+          }}
+        >
+
+          <div className="best-site-header">
+
+            <div>
+
+              <div className="best-site-title">
+                <Trophy size={22} />
+
+                Best Renewable Site
+              </div>
+
+              <p>
+                Highest AI deployment suitability
+              </p>
+
+            </div>
+
+            <span className="best-site-badge">
+              TOP SITE
+            </span>
+
+          </div>
+
+
+          {topSite ? (
+
+            <>
+
+              <h1>
+                {topSite.site_name}
+              </h1>
+
+              <div className="best-site-score">
+
+                <div>
+
+                  <span>
+                    Overall Score
+                  </span>
+
                   <strong>
                     {topSite.overall_score}%
                   </strong>
-                </p>
-
-                <p>
-                  Predicted Power:{" "}
-                  <strong>
-                    {topSite.predicted_power} W
-                  </strong>
-                </p>
-
-                <p>
-                  Best Energy Source:{" "}
-                  <strong>
-                    {topSite.best_energy_source}
-                  </strong>
-                </p>
-
-                <p>
-                  Recommendation:{" "}
-                  <strong>
-                    {topSite.recommendation}
-                  </strong>
-                </p>
-
-                <div
-                  style={{
-                    marginTop: "18px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    fontWeight: "700",
-                  }}
-                >
-                  <Brain size={18} />
-
-                  View AI Recommendation
-
-                  <ArrowRight size={18} />
 
                 </div>
 
-              </>
+                <div>
 
-            ) : (
+                  <span>
+                    Predicted Power
+                  </span>
 
-              <>
+                  <strong>
+                    {topSite.predicted_power} W
+                  </strong>
 
-                <h1>
-                  No Data
-                </h1>
+                </div>
 
-                <p>
-                  Generate an AI prediction to
-                  identify the best renewable site.
-                </p>
+              </div>
 
-              </>
 
-            )}
+              <div className="best-site-source">
+
+                <CloudSun size={20} />
+
+                <div>
+
+                  <span>
+                    Recommended Source
+                  </span>
+
+                  <strong>
+                    {topSite.best_energy_source ||
+                      "N/A"}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              <p className="best-site-recommendation">
+
+                {topSite.recommendation ||
+                  "No recommendation available."}
+
+              </p>
+
+
+              <button
+                className="ai-action-button"
+                onClick={openTopSitePrediction}
+              >
+
+                <Brain size={18} />
+
+                View AI Recommendation
+
+                <ArrowRight size={18} />
+
+              </button>
+
+            </>
+
+          ) : (
+
+            <div className="empty-dashboard-state">
+
+              <Target size={35} />
+
+              <h3>
+                No Site Intelligence Yet
+              </h3>
+
+              <p>
+                Generate an AI prediction to identify
+                the best renewable deployment site.
+              </p>
+
+              <button
+                onClick={() =>
+                  navigate("/prediction")
+                }
+              >
+                Run AI Prediction
+              </button>
+
+            </div>
+
+          )}
+
+        </motion.div>
+
+
+        {/* ===================================================
+            AI SYSTEM SUMMARY
+        =================================================== */}
+
+        <div className="system-summary-panel">
+
+          <div className="panel-heading">
+
+            <div>
+
+              <h2>
+                AI System Summary
+              </h2>
+
+              <p>
+                Renewable deployment intelligence
+              </p>
+
+            </div>
+
+            <Brain size={25} />
 
           </div>
 
 
-          {/* ====================================
-              AI SYSTEM SUMMARY
-          ==================================== */}
+          <div className="summary-score">
 
-          <div className="weather">
+            <div className="summary-score-circle">
 
-            <h3>
-              AI System Summary
-            </h3>
+              <strong>
+                {averageOverallScore}%
+              </strong>
+
+              <span>
+                Overall
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div className="summary-row">
+
+            <div>
+              <Sun size={19} />
+              Solar Suitability
+            </div>
+
+            <strong>
+              {averageSolarScore}%
+            </strong>
+
+          </div>
+
+
+          <div className="summary-row">
+
+            <div>
+              <Wind size={19} />
+              Wind Suitability
+            </div>
+
+            <strong>
+              {averageWindScore}%
+            </strong>
+
+          </div>
+
+
+          <div className="summary-row">
+
+            <div>
+              <Zap size={19} />
+              Predicted Power
+            </div>
+
+            <strong>
+              {averagePrediction} W
+            </strong>
+
+          </div>
+
+
+          <button
+            className="summary-button"
+            onClick={() =>
+              navigate("/analytics")
+            }
+          >
+
+            <BarChart3 size={18} />
+
+            Open Detailed Analytics
+
+            <ArrowRight size={18} />
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      {/* =====================================================
+          QUICK INTELLIGENCE
+      ===================================================== */}
+
+      <div className="quick-intelligence">
+
+        <div className="quick-heading">
+
+          <div>
 
             <h2>
-              {statistics.average_overall_score || 0}%
+              Renewable Intelligence Tools
             </h2>
 
             <p>
-              Average Renewable Suitability
-            </p>
-
-            <p>
-              Solar:{" "}
-              <strong>
-                {statistics.average_solar_score || 0}%
-              </strong>
-            </p>
-
-            <p>
-              Wind:{" "}
-              <strong>
-                {statistics.average_wind_score || 0}%
-              </strong>
+              Explore deeper site and deployment intelligence
             </p>
 
           </div>
+
+          <Sparkles size={25} />
+
+        </div>
+
+
+        <div className="quick-grid">
+
+          {/* AI PREDICTION */}
+
+          <button
+            className="quick-card"
+            onClick={() =>
+              navigate("/prediction")
+            }
+          >
+
+            <div className="quick-icon">
+              <Brain size={25} />
+            </div>
+
+            <div>
+
+              <h3>
+                AI Prediction
+              </h3>
+
+              <p>
+                Generate ML-powered solar prediction,
+                suitability scores and deployment
+                recommendations.
+              </p>
+
+            </div>
+
+            <ArrowRight size={20} />
+
+          </button>
+
+
+          {/* RESOURCE ASSESSMENT */}
+
+          <button
+            className="quick-card"
+            onClick={openResourceAssessment}
+          >
+
+            <div className="quick-icon">
+              <Wind size={25} />
+            </div>
+
+            <div>
+
+              <h3>
+                Resource Assessment
+              </h3>
+
+              <p>
+                Analyze wind resource quality,
+                wind speed, classification and
+                deployment potential.
+              </p>
+
+            </div>
+
+            <ArrowRight size={20} />
+
+          </button>
+
+
+          {/* GIS */}
+
+          <button
+            className="quick-card"
+            onClick={() =>
+              navigate("/gis")
+            }
+          >
+
+            <div className="quick-icon">
+              <MapPin size={25} />
+            </div>
+
+            <div>
+
+              <h3>
+                GIS Intelligence
+              </h3>
+
+              <p>
+                Explore renewable sites and
+                geographic deployment information.
+              </p>
+
+            </div>
+
+            <ArrowRight size={20} />
+
+          </button>
+
+
+          {/* ANALYTICS */}
+
+          <button
+            className="quick-card"
+            onClick={() =>
+              navigate("/analytics")
+            }
+          >
+
+            <div className="quick-icon">
+              <BarChart3 size={25} />
+            </div>
+
+            <div>
+
+              <h3>
+                Analytics
+              </h3>
+
+              <p>
+                Review historical predictions,
+                trends and renewable performance.
+              </p>
+
+            </div>
+
+            <ArrowRight size={20} />
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      {/* =====================================================
+          RECENT PREDICTIONS
+      ===================================================== */}
+
+      <div className="recent-predictions-panel">
+
+        <div className="panel-heading">
+
+          <div>
+
+            <h2>
+              Recent AI Predictions
+            </h2>
+
+            <p>
+              Latest renewable intelligence generated by
+              the platform
+            </p>
+
+          </div>
+
+          <Clock size={25} />
+
+        </div>
+
+
+        {recentPredictions.length > 0 ? (
+
+          <div className="recent-table-wrapper">
+
+            <table className="recent-table">
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Site
+                  </th>
+
+                  <th>
+                    Predicted Power
+                  </th>
+
+                  <th>
+                    Overall Score
+                  </th>
+
+                  <th>
+                    Recommendation
+                  </th>
+
+                  <th>
+                    Generated
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                {recentPredictions.map(
+                  (prediction, index) => (
+
+                    <tr
+                      key={`${prediction.site_id}-${index}`}
+                    >
+
+                      <td>
+
+                        <div className="site-table-cell">
+
+                          <MapPin size={17} />
+
+                          Site {prediction.site_id}
+
+                        </div>
+
+                      </td>
+
+
+                      <td>
+
+                        <strong>
+                          {prediction.predicted_power} W
+                        </strong>
+
+                      </td>
+
+
+                      <td>
+
+                        <span
+                          className={
+                            prediction.overall_score >=
+                            85
+                              ? "score-badge excellent"
+                              : prediction.overall_score >=
+                                70
+                              ? "score-badge good"
+                              : "score-badge moderate"
+                          }
+                        >
+                          {prediction.overall_score}%
+                        </span>
+
+                      </td>
+
+
+                      <td>
+                        {prediction.recommendation ||
+                          "N/A"}
+                      </td>
+
+
+                      <td>
+                        {formatDate(
+                          prediction.created_at
+                        )}
+                      </td>
+
+                    </tr>
+
+                  )
+                )}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        ) : (
+
+          <div className="empty-predictions">
+
+            <Activity size={32} />
+
+            <h3>
+              No Recent Predictions
+            </h3>
+
+            <p>
+              Generate an AI prediction to start
+              building your renewable intelligence history.
+            </p>
+
+            <button
+              onClick={() =>
+                navigate("/prediction")
+              }
+            >
+              Generate Prediction
+            </button>
+
+          </div>
+
+        )}
+
+      </div>
+
+
+      {/* =====================================================
+          FOOTER INSIGHT
+      ===================================================== */}
+
+      <div className="dashboard-insight">
+
+        <div className="insight-icon">
+          <Sparkles size={24} />
+        </div>
+
+        <div>
+
+          <strong>
+            AI Deployment Insight
+          </strong>
+
+          <p>
+
+            The platform continuously evaluates
+            renewable energy potential using
+            environmental data, machine learning
+            predictions and site suitability scores
+            to support smarter deployment decisions.
+
+          </p>
 
         </div>
 
@@ -722,3 +1381,4 @@ function Dashboard() {
 }
 
 export default Dashboard;
+

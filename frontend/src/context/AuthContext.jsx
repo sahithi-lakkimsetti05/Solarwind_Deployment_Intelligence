@@ -17,10 +17,13 @@ export function AuthProvider({ children }) {
     setToken(null);
   };
 
+  const isAuthenticated = !!token;
+
   return (
     <AuthContext.Provider
       value={{
         token,
+        isAuthenticated,
         login,
         logout,
       }}

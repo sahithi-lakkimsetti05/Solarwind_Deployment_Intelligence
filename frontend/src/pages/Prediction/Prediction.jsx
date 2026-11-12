@@ -12,10 +12,20 @@ import {
   TrendingUp,
   History,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  DollarSign,
+  ShieldCheck,
+  Target,
+  ArrowRight,
+  Sparkles,
+  Settings,
+  Layers
 } from "lucide-react";
 
 import api from "../../services/api";
+import {
+  getDeploymentOptimization
+} from "../../services/predictionService";
 
 function Prediction() {
   const [searchParams] = useSearchParams();
@@ -28,11 +38,19 @@ function Prediction() {
   const [recommendation, setRecommendation] = useState(null);
   const [history, setHistory] = useState([]);
 
+  // Investment state
+  const [investment, setInvestment] = useState(null);
+  // Deployment Optimization state
+const [deploymentOptimization, setDeploymentOptimization] = useState(null);
+
+// Solar Forecast state
+const [forecast, setForecast] = useState(null);
+
   const [error, setError] = useState("");
 
-  // ========================================
+  // =====================================================
   // READ SITE ID FROM URL
-  // ========================================
+  // =====================================================
 
   useEffect(() => {
     const urlSiteId = searchParams.get("siteId");
@@ -42,9 +60,9 @@ function Prediction() {
     }
   }, [searchParams]);
 
-  // ========================================
+  // =====================================================
   // RUN AI PREDICTION
-  // ========================================
+  // =====================================================
 
   const handlePrediction = async (selectedSiteId = siteId) => {
     if (!selectedSiteId) {
@@ -56,18 +74,18 @@ function Prediction() {
       setLoading(true);
       setError("");
 
+      // Clear old results
       setPrediction(null);
-      setAnalytics(null);
-      setRecommendation(null);
-      setHistory([]);
+setAnalytics(null);
+setRecommendation(null);
+setHistory([]);
+setInvestment(null);
+setDeploymentOptimization(null);
+setForecast(null);
 
-      /*
-       * STEP 1
-       * Run the existing ML prediction.
-       *
-       * This endpoint also creates a prediction-history
-       * record in the database.
-       */
+      // =================================================
+      // STEP 1 - ML SOLAR PREDICTION
+      // =================================================
 
       const predictionResponse = await api.get(
         `/prediction/ml/solar/${selectedSiteId}`
@@ -75,43 +93,130 @@ function Prediction() {
 
       setPrediction(predictionResponse.data);
 
-      /*
-       * STEP 2
-       * Fetch recommendation, analytics and history.
-       */
+      // =================================================
+      // STEP 2 - GET ALL ADDITIONAL INTELLIGENCE
+      // =================================================
 
       const [
-        recommendationResponse,
-        analyticsResponse,
-        historyResponse
-      ] = await Promise.all([
-        api.get(
-          `/prediction/recommendation/${selectedSiteId}`
-        ),
+  recommendationResponse,
+  analyticsResponse,
+  historyResponse,
+  investmentResponse,
+  deploymentResponse,
+  forecastResponse
+] = await Promise.all([
+  api.get(
+    `/prediction/recommendation/${selectedSiteId}`
+  ),
 
-        api.get(
-          `/prediction/analytics/${selectedSiteId}`
-        ),
+  api.get(
+    `/prediction/analytics/${selectedSiteId}`
+  ),
 
-        api.get(
-          `/prediction/history/${selectedSiteId}`
-        )
-      ]);
+  api.get(
+    `/prediction/history/${selectedSiteId}`
+  ),
+
+  api.get(
+    `/prediction/investment/${selectedSiteId}`
+  ),
+
+  api.get(
+    `/prediction/deployment-optimization/${selectedSiteId}`
+  ),
+
+  api.get(
+    `/prediction/forecast/${selectedSiteId}`
+  )
+]);
+
+      // =================================================
+      // RECOMMENDATION
+      // =================================================
 
       setRecommendation(
         recommendationResponse.data
       );
 
+      // =================================================
+      // ANALYTICS
+      // =================================================
+
       setAnalytics(
         analyticsResponse.data
       );
+
+      // =================================================
+      // HISTORY
+      // =================================================
 
       setHistory(
         historyResponse.data
       );
 
+      // =================================================
+      // INVESTMENT
+      //
+      // Backend returns:
+      //
+      // {
+      //   site_id: 1,
+      //   site: {...},
+      //   site_intelligence: {...},
+      //   investment: {...}
+      // }
+      //
+      // Therefore we specifically extract .investment
+      // =================================================
+
+      console.log(
+        "Investment API response:",
+        investmentResponse.data
+      );
+
+      setInvestment(
+        investmentResponse.data?.investment ||
+        null
+      );
+      // =================================================
+// DEPLOYMENT OPTIMIZATION
+// =================================================
+
+console.log(
+  "Deployment Optimization API response:",
+  deploymentResponse.data
+);
+
+setDeploymentOptimization(
+  deploymentResponse.data?.deployment_optimization ||
+  null
+);
+
+
+// =================================================
+// SOLAR FORECAST
+// =================================================
+
+console.log(
+  "Solar Forecast API response:",
+  forecastResponse.data
+);
+
+setForecast(
+  forecastResponse.data?.forecast ||
+  null
+);
+
     } catch (err) {
-      console.error("Prediction error:", err);
+      console.error(
+        "Prediction error:",
+        err
+      );
+
+      console.error(
+        "Backend response:",
+        err.response?.data
+      );
 
       setError(
         err.response?.data?.detail ||
@@ -122,9 +227,9 @@ function Prediction() {
     }
   };
 
-  // ========================================
+  // =====================================================
   // AUTOMATIC PREDICTION FROM DASHBOARD
-  // ========================================
+  // =====================================================
 
   useEffect(() => {
     const urlSiteId = searchParams.get("siteId");
@@ -134,9 +239,9 @@ function Prediction() {
     }
   }, [searchParams]);
 
-  // ========================================
+  // =====================================================
   // FORMAT DATE
-  // ========================================
+  // =====================================================
 
   const formatDate = (date) => {
     if (!date) return "-";
@@ -144,16 +249,16 @@ function Prediction() {
     return new Date(date).toLocaleString();
   };
 
-  // ========================================
+  // =====================================================
   // UI
-  // ========================================
+  // =====================================================
 
   return (
     <div className="prediction-page">
 
-      {/* =========================================
+      {/* =================================================
           HEADER
-      ========================================= */}
+      ================================================= */}
 
       <div className="prediction-header">
 
@@ -178,9 +283,9 @@ function Prediction() {
       </div>
 
 
-      {/* =========================================
+      {/* =================================================
           INPUT CARD
-      ========================================= */}
+      ================================================= */}
 
       <div className="prediction-input-card">
 
@@ -218,9 +323,9 @@ function Prediction() {
       </div>
 
 
-      {/* =========================================
+      {/* =================================================
           ERROR
-      ========================================= */}
+      ================================================= */}
 
       {error && (
         <div className="prediction-error">
@@ -229,16 +334,17 @@ function Prediction() {
       )}
 
 
-      {/* =========================================
-          CURRENT AI PREDICTION
-      ========================================= */}
+      {/* =================================================
+          RESULTS
+      ================================================= */}
 
       {prediction && (
+
         <div className="prediction-results">
 
-          {/* =====================================
-              POWER
-          ===================================== */}
+          {/* =================================================
+              POWER CARD
+          ================================================= */}
 
           <div className="power-card">
 
@@ -263,9 +369,9 @@ function Prediction() {
           </div>
 
 
-          {/* =====================================
+          {/* =================================================
               SCORE CARDS
-          ===================================== */}
+          ================================================= */}
 
           <div className="score-grid">
 
@@ -316,9 +422,9 @@ function Prediction() {
           </div>
 
 
-          {/* =====================================
+          {/* =================================================
               RECOMMENDATION
-          ===================================== */}
+          ================================================= */}
 
           <div className="recommendation-card">
 
@@ -347,9 +453,9 @@ function Prediction() {
           </div>
 
 
-          {/* =====================================
+          {/* =================================================
               LIVE ENVIRONMENT
-          ===================================== */}
+          ================================================= */}
 
           <div className="environment-card">
 
@@ -360,68 +466,80 @@ function Prediction() {
             <div className="environment-grid">
 
               <div>
+
                 <span>
                   Temperature
                 </span>
 
                 <strong>
-                  {prediction.live_environment.temperature}
+                  {prediction.live_environment?.temperature ?? "-"}
                 </strong>
+
               </div>
 
 
               <div>
+
                 <span>
                   Rainfall
                 </span>
 
                 <strong>
-                  {prediction.live_environment.rainfall}
+                  {prediction.live_environment?.rainfall ?? "-"}
                 </strong>
+
               </div>
 
 
               <div>
+
                 <span>
                   Air Pressure
                 </span>
 
                 <strong>
-                  {prediction.live_environment.air_pressure}
+                  {prediction.live_environment?.air_pressure ?? "-"}
                 </strong>
+
               </div>
 
 
               <div>
+
                 <span>
                   Cloud Cover
                 </span>
 
                 <strong>
-                  {prediction.live_environment.cloud}
+                  {prediction.live_environment?.cloud ?? "-"}
                 </strong>
+
               </div>
 
 
               <div>
+
                 <span>
                   Solar Irradiance (G)
                 </span>
 
                 <strong>
-                  {prediction.live_environment.irradiance_g}
+                  {prediction.live_environment?.irradiance_g ?? "-"}
                 </strong>
+
               </div>
 
 
               <div>
+
                 <span>
                   Solar Irradiance (A)
                 </span>
 
                 <strong>
-                  {prediction.live_environment.irradiance_a}
+                  {prediction.live_environment?.irradiance_a ?? "-"}
                 </strong>
+
               </div>
 
             </div>
@@ -429,11 +547,12 @@ function Prediction() {
           </div>
 
 
-          {/* =====================================
+          {/* =================================================
               SITE INTELLIGENCE
-          ===================================== */}
+          ================================================= */}
 
           {recommendation && (
+
             <div className="recommendation-details-card">
 
               <div className="section-heading">
@@ -460,8 +579,11 @@ function Prediction() {
                 <div className="intelligence-section">
 
                   <h3>
+
                     <CheckCircle size={20} />
+
                     Strengths
+
                   </h3>
 
                   {recommendation.strengths?.length > 0 ? (
@@ -470,9 +592,11 @@ function Prediction() {
 
                       {recommendation.strengths.map(
                         (item, index) => (
+
                           <li key={index}>
                             {item}
                           </li>
+
                         )
                       )}
 
@@ -492,8 +616,11 @@ function Prediction() {
                 <div className="intelligence-section">
 
                   <h3>
+
                     <AlertTriangle size={20} />
+
                     Weaknesses
+
                   </h3>
 
                   {recommendation.weaknesses?.length > 0 ? (
@@ -502,9 +629,11 @@ function Prediction() {
 
                       {recommendation.weaknesses.map(
                         (item, index) => (
+
                           <li key={index}>
                             {item}
                           </li>
+
                         )
                       )}
 
@@ -536,14 +665,635 @@ function Prediction() {
               </div>
 
             </div>
+
           )}
 
 
-          {/* =====================================
+          {/* =================================================
+              INVESTMENT RECOMMENDATION
+          ================================================= */}
+
+          {investment && (
+
+            <div className="investment-card">
+
+              {/* ---------------------------------------------
+                  HEADER
+              --------------------------------------------- */}
+
+              <div className="investment-header">
+
+                <div className="investment-title-icon">
+
+                  <DollarSign size={28} />
+
+                </div>
+
+                <div>
+
+                  <h2>
+                    Investment Recommendation
+                  </h2>
+
+                  <p>
+                    AI-powered investment and deployment assessment
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              {/* ---------------------------------------------
+                  INVESTMENT METRICS
+              --------------------------------------------- */}
+
+              <div className="investment-grid">
+
+                {/* Investment Rating */}
+
+                <div className="investment-item">
+
+                  <div className="investment-item-icon">
+                    <Sparkles size={20} />
+                  </div>
+
+                  <span>
+                    Investment Rating
+                  </span>
+
+                  <strong>
+                    {investment.investment_rating ?? "N/A"}
+                  </strong>
+
+                </div>
+
+
+                {/* Investment Level */}
+
+                <div className="investment-item">
+
+                  <div className="investment-item-icon">
+                    <TrendingUp size={20} />
+                  </div>
+
+                  <span>
+                    Investment Level
+                  </span>
+
+                  <strong>
+                    {investment.investment_level ?? "N/A"}
+                  </strong>
+
+                </div>
+
+
+                {/* Risk */}
+
+                <div className="investment-item">
+
+                  <div className="investment-item-icon">
+                    <ShieldCheck size={20} />
+                  </div>
+
+                  <span>
+                    Risk Level
+                  </span>
+
+                  <strong>
+                    {investment.risk_level ?? "N/A"}
+                  </strong>
+
+                </div>
+
+
+                {/* Recommended Source */}
+
+                <div className="investment-item">
+
+                  <div className="investment-item-icon">
+                    <Zap size={20} />
+                  </div>
+
+                  <span>
+                    Recommended Source
+                  </span>
+
+                  <strong>
+                    {investment.recommended_source ?? "N/A"}
+                  </strong>
+
+                </div>
+
+
+                {/* Suitability */}
+
+                <div className="investment-item">
+
+                  <div className="investment-item-icon">
+                    <Target size={20} />
+                  </div>
+
+                  <span>
+                    Site Suitability
+                  </span>
+
+                  <strong>
+                    {investment.suitability ?? "N/A"}
+                  </strong>
+
+                </div>
+
+
+                {/* Deployment Priority */}
+
+                <div className="investment-item">
+
+                  <div className="investment-item-icon">
+                    <ArrowRight size={20} />
+                  </div>
+
+                  <span>
+                    Deployment Priority
+                  </span>
+
+                  <strong>
+                    {investment.deployment_priority ?? "N/A"}
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              {/* ---------------------------------------------
+                  OVERALL SCORE
+              --------------------------------------------- */}
+
+              <div className="investment-score">
+
+                <div>
+
+                  <span>
+                    Overall Site Score
+                  </span>
+
+                  <strong>
+                    {investment.overall_score ?? 0}
+                    <small>/100</small>
+                  </strong>
+
+                </div>
+
+                <div className="investment-score-bar">
+
+                  <div
+                    className="investment-score-fill"
+                    style={{
+                      width: `${Math.min(
+                        Number(investment.overall_score) || 0,
+                        100
+                      )}%`
+                    }}
+                  ></div>
+
+                </div>
+
+              </div>
+
+
+              {/* ---------------------------------------------
+                  WHY THIS INVESTMENT?
+              --------------------------------------------- */}
+
+              <div className="investment-text-section">
+
+                <h3>
+                  Why this investment?
+                </h3>
+
+                <p>
+                  {investment.investment_reason ||
+                    "No investment reason available."}
+                </p>
+
+              </div>
+
+
+              {/* ---------------------------------------------
+                  FINANCIAL ASSESSMENT
+              --------------------------------------------- */}
+
+              <div className="investment-text-section">
+
+                <h3>
+                  Financial Assessment
+                </h3>
+
+                <p>
+                  {investment.financial_assessment ||
+                    "No financial assessment available."}
+                </p>
+
+              </div>
+
+
+              {/* ---------------------------------------------
+                  AI INVESTMENT RECOMMENDATION
+              --------------------------------------------- */}
+
+              <div className="investment-highlight">
+
+                <div className="investment-highlight-icon">
+
+                  <Sparkles size={22} />
+
+                </div>
+
+                <div>
+
+                  <strong>
+                    AI Investment Recommendation
+                  </strong>
+
+                  <p>
+                    {investment.investment_recommendation ||
+                      "No investment recommendation available."}
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              {/* ---------------------------------------------
+                  NEXT STEP
+              --------------------------------------------- */}
+
+              <div className="investment-next-step">
+
+                <div className="investment-next-icon">
+
+                  <ArrowRight size={22} />
+
+                </div>
+
+                <div>
+
+                  <strong>
+                    Recommended Next Step
+                  </strong>
+
+                  <p>
+                    {investment.next_step ||
+                      "No next step available."}
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          )}
+
+
+          {/* =================================================
+    DEPLOYMENT OPTIMIZATION
+================================================= */}
+
+{deploymentOptimization && (
+
+  <div className="deployment-optimization-card">
+
+    <div className="section-heading">
+
+      <Target size={25} />
+
+      <div>
+
+        <h2>
+          Deployment Optimization
+        </h2>
+
+        <p>
+          AI-powered renewable energy deployment strategy
+        </p>
+
+      </div>
+
+    </div>
+
+
+    {/* =============================================
+        DEPLOYMENT SUMMARY
+    ============================================= */}
+
+    <div className="deployment-summary">
+
+      <div className="deployment-main">
+
+        <span>
+          Recommended Energy Source
+        </span>
+
+        <strong>
+          {deploymentOptimization.recommended_source || "N/A"}
+        </strong>
+
+      </div>
+
+
+      <div className="deployment-decision">
+
+        <span>
+          Deployment Decision
+        </span>
+
+        <strong>
+          {deploymentOptimization.deployment_decision || "N/A"}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    {/* =============================================
+        OPTIMIZATION METRICS
+    ============================================= */}
+
+    <div className="deployment-grid">
+
+      <div className="deployment-item">
+
+        <span>
+          Alternative Source
+        </span>
+
+        <strong>
+          {deploymentOptimization.alternative_source || "N/A"}
+        </strong>
+
+      </div>
+
+
+      <div className="deployment-item">
+
+        <span>
+          Overall Score
+        </span>
+
+        <strong>
+          {deploymentOptimization.overall_score ?? 0}/100
+        </strong>
+
+      </div>
+
+
+      <div className="deployment-item">
+
+        <span>
+          Site Suitability
+        </span>
+
+        <strong>
+          {deploymentOptimization.suitability || "N/A"}
+        </strong>
+
+      </div>
+
+
+      <div className="deployment-item">
+
+        <span>
+          Deployment Priority
+        </span>
+
+        <strong>
+          {deploymentOptimization.deployment_priority || "N/A"}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    {/* =============================================
+        DEPLOYMENT STRATEGY
+    ============================================= */}
+
+    <div className="deployment-text-section">
+
+      <h3>
+        Deployment Strategy
+      </h3>
+
+      <p>
+        {deploymentOptimization.deployment_strategy ||
+          "No deployment strategy available."}
+      </p>
+
+    </div>
+
+
+    {/* =============================================
+        SOURCE REASON
+    ============================================= */}
+
+    <div className="deployment-text-section">
+
+      <h3>
+        Why this source?
+      </h3>
+
+      <p>
+        {deploymentOptimization.source_reason ||
+          "No source reasoning available."}
+      </p>
+
+    </div>
+
+
+    {/* =============================================
+        OPTIMIZATION REASON
+    ============================================= */}
+
+    <div className="deployment-highlight">
+
+      <div className="deployment-highlight-icon">
+
+        <Sparkles size={22} />
+
+      </div>
+
+      <div>
+
+        <strong>
+          AI Optimization Insight
+        </strong>
+
+        <p>
+          {deploymentOptimization.optimization_reason ||
+            "No optimization insight available."}
+        </p>
+
+      </div>
+
+    </div>
+
+
+    {/* =============================================
+        WIND RESOURCE
+    ============================================= */}
+
+    {deploymentOptimization.wind_resource && (
+
+      <div className="wind-resource-summary">
+
+        <h3>
+          Wind Resource Assessment
+        </h3>
+
+        <div className="wind-resource-grid">
+
+          <div>
+
+            <span>
+              Wind Class
+            </span>
+
+            <strong>
+              {deploymentOptimization.wind_resource.wind_class ||
+                "N/A"}
+            </strong>
+
+          </div>
+
+          <div>
+
+            <span>
+              Resource Level
+            </span>
+
+            <strong>
+              {deploymentOptimization.wind_resource.resource_level ||
+                "N/A"}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    )}
+
+  </div>
+
+)}
+
+{/* =================================================
+    SOLAR POWER FORECAST
+================================================= */}
+
+{forecast && (
+
+  <div className="forecast-card">
+
+    <div className="section-heading">
+
+      <TrendingUp size={25} />
+
+      <div>
+
+        <h2>
+          Solar Power Forecast
+        </h2>
+
+        <p>
+          AI-based solar generation potential forecast
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div className="forecast-main">
+
+      <div className="forecast-power">
+
+        <span>
+          Predicted Power
+        </span>
+
+        <strong>
+          {forecast.predicted_power ?? 0}
+        </strong>
+
+        <small>
+          {forecast.unit || "kW"}
+        </small>
+
+      </div>
+
+
+      <div className="forecast-status">
+
+        <span>
+          Status
+        </span>
+
+        <strong>
+          {forecast.status || "N/A"}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div className="forecast-details">
+
+      <div>
+
+        <span>
+          Model
+        </span>
+
+        <strong>
+          {forecast.model || "N/A"}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>
+          Forecast Type
+        </span>
+
+        <strong>
+          {forecast.forecast_type || "Solar Power Forecast"}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </div>
+
+)}
+
+
+          {/* =================================================
               ANALYTICS
-          ===================================== */}
+          ================================================= */}
 
           {analytics && (
+
             <div className="analytics-card">
 
               <div className="section-heading">
@@ -647,14 +1397,16 @@ function Prediction() {
               </div>
 
             </div>
+
           )}
 
 
-          {/* =====================================
+          {/* =================================================
               PREDICTION HISTORY
-          ===================================== */}
+          ================================================= */}
 
           {history.length > 0 && (
+
             <div className="history-card">
 
               <div className="section-heading">
@@ -716,6 +1468,7 @@ function Prediction() {
 
                   </thead>
 
+
                   <tbody>
 
                     {history.map((record) => (
@@ -723,7 +1476,9 @@ function Prediction() {
                       <tr key={record.id}>
 
                         <td>
-                          {formatDate(record.created_at)}
+                          {formatDate(
+                            record.created_at
+                          )}
                         </td>
 
                         <td>
@@ -761,9 +1516,11 @@ function Prediction() {
               </div>
 
             </div>
+
           )}
 
         </div>
+
       )}
 
     </div>
